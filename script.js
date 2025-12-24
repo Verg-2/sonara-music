@@ -302,7 +302,6 @@ function playArtist(artist) {
                 updatePlayerDisplay();
                 isPlaying = true;
                 updatePlayButton();
-                showNotification(`${currentSong.title} çalıyor`);
                 // Sunucuya dinlenme sayısını işaretle
                 if (song._id) {
                     await playSongOnServer(song._id);
@@ -314,7 +313,6 @@ function playArtist(artist) {
                 updatePlayerDisplay();
                 isPlaying = true;
                 updatePlayButton();
-                showNotification(`${artist.name} çalıyor`);
             }
         } catch (err) {
             console.warn('Şarkı yüklenemedi, yerel davranışa düşülüyor:', err);
@@ -323,7 +321,6 @@ function playArtist(artist) {
             updatePlayerDisplay();
             isPlaying = true;
             updatePlayButton();
-            showNotification(`${artist.name} çalıyor`);
         }
         // Oynatma animasyonu
         const allCards = document.querySelectorAll('.artist-card');
