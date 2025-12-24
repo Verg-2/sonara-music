@@ -120,7 +120,7 @@ function createArtistCard(artist) {
     
     // Add event listeners
     card.addEventListener('click', () => playArtist(artist));
-    card.addEventListener('contextmenu', (e) => showContextMenu(e, artist));
+    // Context menu disabled for artist cards as requested
     
     return card;
 }

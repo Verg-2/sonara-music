@@ -385,6 +385,35 @@ body {
     color: #fff;
 }
 
+/* Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translate(8px, -50%);
+    background: rgba(255, 0, 0, 0.12);
+    color: #ddd;
+    border: 1px solid rgba(255, 0, 0, 0.35);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
 /* Animations */
 @keyframes pulse {
     0% { transform: scale(1); }
