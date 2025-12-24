@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müzik Uygulaması</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">♪</div>
+            </div>
+            
+            <div class="nav-icons">
+                <div class="nav-item active" id="home-btn">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="nav-item" id="library-btn">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="nav-item" id="users-btn">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <div class="profile-icon">K</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                 <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Ara" id="search-input">
+                </div>
+                <div class="category-buttons">
+                    <button class="category-btn active" data-category="odaklanma">Odaklanma</button>
+                    <button class="category-btn" data-category="antreman">Antreman</button>
+                    <button class="category-btn" data-category="parti">Parti</button>
+                    <button class="category-btn" data-category="huzunlu">Hüzünlü</button>
+                    <button class="category-btn" data-category="enerjik">Enerjik</button>
+                </div>
+            </div>
+
+            <!-- Artists Grid -->
+            <div class="artists-grid" id="artists-grid">
+                <!-- Artists will be dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Context Menu -->
+        <div class="context-menu" id="context-menu">
+            <div class="menu-item" id="play-radio">
+                <i class="fas fa-radio"></i>
+                <span>Radyoyu başlat</span>
+            </div>
+            <div class="menu-item" id="play-after">
+                <i class="fas fa-play"></i>
+                <span>Bundan sonra oynat</span>
+            </div>
+            <div class="menu-item" id="add-queue">
+                <i class="fas fa-list"></i>
+                <span>Sıraya ekle</span>
+            </div>
+            <div class="menu-item" id="like-song">
+                <i class="fas fa-heart"></i>
+                <span>Beğenilen şarkılara ekle</span>
+            </div>
+            <div class="menu-item" id="download">
+                <i class="fas fa-download"></i>
+                <span>İndir</span>
+            </div>
+            <div class="menu-item" id="add-playlist">
+                <i class="fas fa-plus"></i>
+                <span>Oynatma listesine ekle</span>
+            </div>
+            <div class="menu-item" id="delete">
+                <i class="fas fa-trash"></i>
+                <span>Sil</span>
+            </div>
+            <div class="menu-item" id="go-album">
+                <i class="fas fa-compact-disc"></i>
+                <span>Albüme git</span>
+            </div>
+            <div class="menu-item" id="go-artist">
+                <i class="fas fa-user"></i>
+                <span>Sanatçıya git</span>
+            </div>
+            <div class="menu-item" id="share">
+                <i class="fas fa-share"></i>
+                <span>Paylaş</span>
+            </div>
+            <div class="menu-item" id="report">
+                <i class="fas fa-flag"></i>
+                <span>Bildir</span>
+            </div>
+            <div class="menu-item" id="add-favorites">
+                <i class="fas fa-star"></i>
+                <span>Sabitle</span>
+            </div>
+            <div class="menu-item" id="close-queue">
+                <i class="fas fa-times"></i>
+                <span>Sırayı kapat</span>
+            </div>
+        </div>
+
+        <!-- Player -->
+        <div class="player">
+            <div class="player-controls">
+                <button class="control-btn" id="prev-btn">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="control-btn play-pause" id="play-pause-btn">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button class="control-btn" id="next-btn">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+            
+            <div class="current-song">
+                <img src="https://via.placeholder.com/50x50/333/fff?text=♪" alt="Current Song" id="current-cover">
+                <div class="song-info">
+                    <div class="song-title" id="current-title">Hasta İşi</div>
+                    <div class="song-artist" id="current-artist">Yener Çevik Hasta İşi 2017</div>
+                </div>
+            </div>
+            
+            <div class="player-options">
+                <button class="option-btn" id="queue-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="option-btn" id="favorite-btn">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="option-btn" id="shuffle-btn">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="option-btn" id="repeat-btn">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="option-btn" id="volume-btn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    background: radial-gradient(circle at center, #1a0505 0%, #000 70%);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    background: linear-gradient(180deg, #2a0000 0%, #000 100%);
+    border-right: 2px solid #ff0000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    position: relative;
+}
+
+.logo {
+    margin-bottom: 40px;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background: #ff0000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logo-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ff0000;
+}
+
+.nav-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    flex: 1;
+}
+
+.nav-item {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #ff0000;
+    border-color: #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.profile-section {
+    margin-top: auto;
+}
+
+.profile-icon {
+    width: 50px;
+    height: 50px;
+    background: #ff0000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ff0000;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #0a0000 0%, #1a0000 50%, #000 100%);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.category-buttons {
+    display: flex;
+    gap: 15px;
+    order: 1;
+}
+
+.category-btn {
+    padding: 10px 20px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #ff0000;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background: #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: max-content;
+    order: 2;
+}
+
+.search-container i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ff0000;
+    pointer-events: none;
+}
+
+#search-input {
+    padding: 12px 20px 12px 45px;
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0000;
+    border-radius: 25px;
+    color: #fff;
+    width: 300px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    height: 44px;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    background: rgba(255, 0, 0, 0.2);
+}
+
+#search-input::placeholder {
+    color: #999;
+}
+
+/* Artists Grid */
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+    padding-bottom: 120px;
+}
+
+.artist-card {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255, 0, 0, 0.05);
+    border: 1px solid transparent;
+}
+
+.artist-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+}
+
+.artist-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    border: 3px solid #ff0000;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.artist-image:hover {
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+    transform: scale(1.05);
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artist-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 10px;
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: rgba(20, 0, 0, 0.95);
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    padding: 10px 0;
+    min-width: 200px;
+    z-index: 1000;
+    display: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.menu-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.menu-item:hover {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+}
+
+.menu-item i {
+    width: 16px;
+    color: #ff0000;
+}
+
+/* Player */
+.player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(90deg, #2a0000 0%, #1a0000 50%, #2a0000 100%);
+    border-top: 2px solid #ff0000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    backdrop-filter: blur(10px);
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.control-btn {
+    background: transparent;
+    border: 2px solid #ff0000;
+    color: #ff0000;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+.control-btn:hover {
+    background: #ff0000;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.play-pause {
+    width: 55px;
+    height: 55px;
+    font-size: 20px;
+}
+
+.current-song {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    margin: 0 40px;
+}
+
+#current-cover {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid #ff0000;
+}
+
+.song-info {
+    flex: 1;
+}
+
+.song-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.song-artist {
+    font-size: 14px;
+    color: #999;
+}
+
+.player-options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.option-btn {
+    background: transparent;
+    border: none;
+    color: #ff0000;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-btn:hover {
+    background: rgba(255, 0, 0, 0.2);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.option-btn.active {
+    background: #ff0000;
+    color: #fff;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.playing {
+    animation: pulse 2s infinite;
+}
+
+/* Scrollbar */
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: #000;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: #ff0000;
+    border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: #cc0000;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: stretch;
+    }
+    
+    .category-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+        order: 2;
+    }
+    
+    .search-container {
+        justify-content: center;
+        order: 1;
+    }
+    
+    #search-input {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .artists-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 20px;
+    }
+    
+    .artist-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .player {
+        padding: 0 15px;
+    }
+    
+    .current-song {
+        margin: 0 20px;
+    }
+    
+    .player-options {
+        gap: 10px;
+    }
+}
