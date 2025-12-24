@@ -451,40 +451,10 @@ function handleKeyboardShortcuts(e) {
     }
 }
 
-// Show notification
+// Show notification (disabled)
 function showNotification(message) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(45deg, #ff0000, #cc0000);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        z-index: 10000;
-        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
-        font-weight: 500;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 10);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
+    // Notifications globally disabled
+    return;
 }
 
 // Add some visual effects
