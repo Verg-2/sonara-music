@@ -49,7 +49,9 @@ let isRepeatOn = false;
 let volume = 0.8;
 
 // Backend API base URL
-const API_URL = 'http://localhost:5000/api';
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api';
 
 // DOM elements
 const categoryButtons = document.querySelectorAll('.category-btn');
