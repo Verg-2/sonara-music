@@ -21,13 +21,18 @@ mongod
 
 ### 3. Environment Variables
 
-`.env` dosyasını düzenleyin:
+`.env` dosyası oluşturun:
 
 ```env
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/muzik-db
-JWT_SECRET=your-super-secret-jwt-key
+JWT_SECRET=your_random_secret_key_here_change_this
 NODE_ENV=development
+```
+
+**Önemli:** `JWT_SECRET` için güçlü, rastgele bir şifre kullanın. Örnek:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### 4. Sunucuyu Başlat
