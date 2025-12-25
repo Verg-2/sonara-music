@@ -1,0 +1,13 @@
+title = "sonara-music gitleaks config"
+
+[allowlist]
+description = "Ignore common non-source folders"
+paths = [
+  "node_modules",
+  "backend/node_modules",
+  "dist",
+  "build",
+  "coverage",
+  "logs",
+  "backend/logs"
+]
