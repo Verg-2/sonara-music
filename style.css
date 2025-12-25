@@ -149,7 +149,10 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease,
+                box-shadow 0.3s ease,
+                background-color 0.3s ease,
+                border-color 0.3s ease;
 }
 
 .logo-icon:hover {
@@ -172,7 +175,10 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     justify-content: center;
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease,
+                transform 0.2s ease;
     border: 2px solid transparent;
 }
 
@@ -198,7 +204,9 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease,
+                box-shadow 0.3s ease,
+                background-color 0.3s ease;
 }
 
 .profile-icon:hover {
@@ -251,7 +259,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
 .category-btn.active {
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.45);
     transform: translateY(-2px);
 }
 
@@ -304,6 +312,13 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 30px;
     padding-bottom: 120px;
+    will-change: opacity;
+}
+
+.artists-grid.loading {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 
 .artist-card {
@@ -317,6 +332,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     border-radius: 15px;
     background: var(--card-bg);
     border: 1px solid transparent;
+    will-change: transform;
 }
 
 .artist-card:hover {
@@ -337,6 +353,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
                 border-color 0.3s ease,
                 box-shadow 0.3s ease;
     position: relative;
+    will-change: transform;
 }
 
 .artist-image:hover {
@@ -368,7 +385,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     min-width: 200px;
     z-index: 1000;
     display: none;
-    backdrop-filter: blur(10px);
+    /* backdrop-filter removed for performance */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
@@ -378,7 +395,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease,
+                color 0.3s ease;
     color: #fff;
 }
 
@@ -493,7 +511,9 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 18px;
     padding: 10px;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                transform 0.2s ease;
     width: 40px;
     height: 40px;
     display: flex;
@@ -639,7 +659,7 @@ body.light-theme [data-tooltip]::after {
     cursor: pointer;
     animation: float-up 8s linear forwards;
     z-index: 1000;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 body.light-theme .bubble {

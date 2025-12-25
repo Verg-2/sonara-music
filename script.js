@@ -62,6 +62,9 @@ let isShuffleOn = false;
 let isRepeatOn = false;
 // Tema durumu
 let isDarkTheme = true;
+// Yükleme ve istek kontrolü
+let isLoadingArtists = false;
+let artistsFetchController = null;
 
 // Backend API base URL
 const API_URL = 'http://localhost:5000/api';
@@ -97,20 +100,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Kategoriye göre sanatçılar yükleme
 async function loadArtists(category) {
+    if (!artistsGrid) return;
+    // Önceki isteği iptal et
+    if (artistsFetchController) {
+        artistsFetchController.abort();
+    }
+    artistsFetchController = new AbortController();
+    const { signal } = artistsFetchController;
+
+    isLoadingArtists = true;
+    artistsGrid.classList.add('loading');
+
     let artists = [];
     try {
-        const res = await fetch(`${API_URL}/artists?category=${encodeURIComponent(category)}`);
+        const res = await fetch(`${API_URL}/artists?category=${encodeURIComponent(category)}`, { signal });
         const data = await res.json();
         artists = data?.data || [];
     } catch (err) {
-        console.warn('API erişilemedi, yerel veriye düşüyor:', err);
-        artists = artistsData[category] || artistsData.odaklanma || [];
+        if (err.name !== 'AbortError') {
+            console.warn('API erişilemedi, yerel veriye düşüyor:', err);
+            artists = artistsData[category] || artistsData.odaklanma || [];
+        } else {
+            return; // iptal edildi
+        }
     }
-    artistsGrid.innerHTML = '';
+
+    // DOM güncellemesini tek seferde yap
+    const frag = document.createDocumentFragment();
     artists.forEach(artist => {
         const artistCard = createArtistCard(artist);
-        artistsGrid.appendChild(artistCard);
+        frag.appendChild(artistCard);
     });
+    artistsGrid.replaceChildren(frag);
+
+    // Yükleme bitti
+    isLoadingArtists = false;
+    artistsGrid.classList.remove('loading');
 }
 
 // Arama API'si
@@ -138,6 +163,8 @@ function createArtistCard(artist) {
     const img = document.createElement('img');
     img.alt = artist.name;
     img.src = sanitizeImage(artist.image, artist.name, 150);
+    img.loading = 'lazy';
+    img.decoding = 'async';
     img.onerror = () => {
         img.onerror = null; // avoid infinite loop if placeholder fails
         img.src = placeholderSvg(artist.name?.charAt(0) || '♪', 150);
@@ -164,6 +191,7 @@ function setupEventListeners() {
     // Category buttons
     categoryButtons.forEach(btn => {
         btn.addEventListener('click', () => {
+            if (isLoadingArtists) return; // hızlı tıklamalarda beklet
             categoryButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentCategory = btn.dataset.category;
@@ -645,8 +673,10 @@ function createBubble() {
     }, duration * 1000);
 }
 
-// Create bubbles periodically
-setInterval(createBubble, 2000);
+// Create bubbles periodically (daha hafif ve yükleme sırasında duraklat)
+setInterval(() => {
+    if (!isLoadingArtists) createBubble();
+}, 3000);
 
 // Create initial bubbles
 for (let i = 0; i < 3; i++) {
