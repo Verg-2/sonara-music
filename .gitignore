@@ -1,6 +1,14 @@
 ﻿# Güvenlik - Environment Variables
 backend/.env
 .env
+.env.*
+backend/.env.*
+
+# Private config/tokens
+.npmrc
+*.pem
+*.key
+*.crt
 
 # Dependencies
 node_modules/
@@ -10,6 +18,7 @@ backend/node_modules/
 *.log
 npm-debug.log*
 backend/logs/
+logs/
 
 # OS
 .DS_Store
