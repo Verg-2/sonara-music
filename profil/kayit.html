@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Yap</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="profil.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="profile-page">
+    <div class="profile-container">
+        <div class="brand-mark">
+            <div class="brand-circle">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="brand-title">Kayıt Yap</div>
+        </div>
+
+        <form class="login-form">
+            <label class="input-label" for="email">E-Posta</label>
+            <input id="email" type="email" placeholder="E-Posta Giriniz" autocomplete="email" required>
+
+            <label class="input-label" for="password">Şifre</label>
+            <input id="password" type="password" placeholder="Şifrenizi Giriniz" autocomplete="new-password" required>
+
+            <button type="submit" class="primary-btn">Kayıt Yap</button>
+        </form>
+
+        <div class="divider">
+            <span></span>
+            <p>Ya Da</p>
+            <span></span>
+        </div>
+
+        <div class="social-buttons">
+            <button class="social-btn google">
+                <i class="fab fa-google"></i>
+                <span>Google ile Kayıt Yap</span>
+            </button>
+            <button class="social-btn apple">
+                <i class="fab fa-apple"></i>
+                <span>iCloud ile Kayıt Yap</span>
+            </button>
+        </div>
+
+        <div class="signup-row">
+            <span>Hesabınız mı var?</span>
+            <a href="profil.html" class="link">Giriş Yap</a>
+        </div>
+    </div>
+
+    <script src="kayit.js"></script>
+</body>
+</html>

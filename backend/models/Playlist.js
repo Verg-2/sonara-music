@@ -21,7 +21,7 @@ const PlaylistSchema = new mongoose.Schema({
     }],
     coverImage: {
         type: String,
-        default: 'https://via.placeholder.com/300x300/ff0000/fff?text=Playlist'
+        default: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='100%25' height='100%25' fill='%23ff0000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EP%3C/text%3E%3C/svg%3E"
     },
     isPublic: {
         type: Boolean,

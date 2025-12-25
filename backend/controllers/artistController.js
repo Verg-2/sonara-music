@@ -2,11 +2,11 @@ const Artist = require('../models/Artist');
 
 // In-memory data fallback (MongoDB yoksa)
 let artistsData = [
-    { _id: '1', name: 'Şiire Gazele', image: 'https://via.placeholder.com/150x150/333/fff?text=ŞG', category: 'odaklanma' },
-    { _id: '2', name: 'Baytar', image: 'https://via.placeholder.com/150x150/333/fff?text=BY', category: 'odaklanma' },
-    { _id: '3', name: 'Bana Sor', image: 'https://via.placeholder.com/150x150/333/fff?text=BS', category: 'odaklanma' },
-    { _id: '4', name: 'Tempo Up', image: 'https://via.placeholder.com/150x150/333/fff?text=TU', category: 'antreman' },
-    { _id: '5', name: 'Party Time', image: 'https://via.placeholder.com/150x150/333/fff?text=PT', category: 'parti' }
+    { _id: '1', name: 'Şiire Gazele', image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EŞG%3C/text%3E%3C/svg%3E", category: 'odaklanma' },
+    { _id: '2', name: 'Baytar', image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EBY%3C/text%3E%3C/svg%3E", category: 'odaklanma' },
+    { _id: '3', name: 'Bana Sor', image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EBS%3C/text%3E%3C/svg%3E", category: 'odaklanma' },
+    { _id: '4', name: 'Tempo Up', image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3ETU%3C/text%3E%3C/svg%3E", category: 'antreman' },
+    { _id: '5', name: 'Party Time', image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EPT%3C/text%3E%3C/svg%3E", category: 'parti' }
 ];
 
 // @desc    Get all artists

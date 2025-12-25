@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-posta Doğrulama</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="profil.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="profile-page">
+    <div class="profile-container">
+        <div class="brand-mark">
+            <div class="brand-circle">
+                <i class="fas fa-envelope-open"></i>
+            </div>
+            <div class="brand-title">E-posta Doğrulama</div>
+        </div>
+
+        <p class="reset-description">E-posta adresinize gönderilen 6 haneli doğrulama kodunu girin.</p>
+
+        <form class="login-form">
+            <label class="input-label" for="code">Doğrulama Kodu</label>
+            <input id="code" type="text" placeholder="6 Haneli Kodu Giriniz" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required>
+
+            <button type="submit" class="primary-btn">Doğrula</button>
+        </form>
+
+        <div class="signup-row">
+            <span>Kod gelmedi mi?</span>
+            <a href="#" class="link" id="resend-link">Tekrar Gönder</a>
+        </div>
+    </div>
+
+    <script src="kod-dogrulama.js"></script>
+</body>
+</html>

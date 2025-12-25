@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müzik Kütüphanesi</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="kutuphane.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">♪</div>
+            </div>
+            <div class="nav-icons">
+                <div class="nav-item" id="home-btn" data-tooltip="Ana sayfa">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="nav-item active" id="library-btn" data-tooltip="Kütüphane">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="nav-item" id="users-btn" data-tooltip="Profilim">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="nav-item" id="theme-toggle-btn" data-tooltip="Tema">
+                    <i class="fas fa-sun"></i>
+                </div>
+            </div>
+            <div class="profile-section">
+                <div class="profile-icon" data-tooltip="Profil">K</div>
+            </div>
+        </div>
+
+        <!-- Library Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Ara" id="search-input">
+                </div>
+                <div class="category-buttons library-tabs">
+                    <button class="category-btn active">Oynatma Listeleri</button>
+                    <button class="category-btn">Şarkılar</button>
+                    <button class="category-btn">Albümler</button>
+                    <button class="category-btn">Sanatçılar</button>
+                </div>
+            </div>
+
+            <div class="library-grid">
+                <div class="library-card">
+                    <div class="library-thumb gradient-1">
+                        <i class="fas fa-thumbs-up"></i>
+                    </div>
+                    <div class="library-title">Beğendiğin Şarkılar</div>
+                </div>
+                <div class="library-card">
+                    <div class="library-thumb gradient-2">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div class="library-title">Arabesk</div>
+                </div>
+                <div class="library-card">
+                    <div class="library-thumb gradient-3">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="library-title">Rap</div>
+                </div>
+                <div class="library-card">
+                    <div class="library-thumb gradient-4">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <div class="library-title">Pop</div>
+                </div>
+                <div class="library-card">
+                    <div class="library-thumb gradient-5">
+                        <i class="fas fa-random"></i>
+                    </div>
+                    <div class="library-title">Karışık</div>
+                </div>
+                <div class="library-card">
+                    <div class="library-thumb gradient-6">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <div class="library-title">Daha sonra dinlemek</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player (aynı görünüm için kopyalandı) -->
+        <div class="player">
+            <div class="player-controls">
+                <button class="control-btn" id="prev-btn">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="control-btn play-pause" id="play-pause-btn">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button class="control-btn" id="next-btn">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+            <div class="current-song">
+                <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect width='100%25' height='100%25' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='18'%3E%E2%99%AA%3C/text%3E%3C/svg%3E" alt="Current Song" id="current-cover">
+                <div class="song-info">
+                    <div class="song-title" id="current-title">Hasta İşi</div>
+                    <div class="song-artist" id="current-artist">Yener Çevik Hasta İşi 2017</div>
+                </div>
+            </div>
+            <div class="player-options">
+                <button class="option-btn" id="queue-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="option-btn" id="favorite-btn">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="option-btn" id="shuffle-btn">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="option-btn" id="repeat-btn">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="option-btn" id="volume-btn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="kutuphane.js"></script>
+</body>
+</html>

@@ -1,4 +1,18 @@
-// Artists data
+// Placeholder helpers to avoid external image errors
+const placeholderSvg = (text = '♪', size = 150) => {
+    const safeText = (text || '♪').toString().slice(0, 3);
+    const fontSize = Math.floor(size / 3);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="100%" height="100%" fill="#333"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="Arial" font-size="${fontSize}">${safeText}</text></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const sanitizeImage = (src, text = '♪', size = 150) => {
+    if (!src || src.includes('placeholder.com')) {
+        return placeholderSvg(text?.toString().charAt(0) || '♪', size);
+    }
+    return src;
+};
+
 const artistsData = {
     odaklanma: [
         { name: "Şiire Gazele", image: "https://via.placeholder.com/150x150/333/fff?text=ŞG" },
@@ -46,15 +60,15 @@ let isPlaying = false;
 let currentSong = { title: "Hasta İşi", artist: "Yener Çevik Hasta İşi 2017" };
 let isShuffleOn = false;
 let isRepeatOn = false;
-let volume = 0.8;
+// Tema durumu
+let isDarkTheme = true;
 
 // Backend API base URL
-const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api' 
-    : '/api';
+const API_URL = 'http://localhost:5000/api';
 
 // DOM elements
-const categoryButtons = document.querySelectorAll('.category-btn');
+// Yalnızca ana sayfadaki kategori butonları (data-category) hedeflenir
+const categoryButtons = document.querySelectorAll('.category-btn[data-category]');
 const artistsGrid = document.getElementById('artists-grid');
 const searchInput = document.getElementById('search-input');
 const contextMenu = document.getElementById('context-menu');
@@ -69,14 +83,19 @@ const currentTitle = document.getElementById('current-title');
 const currentArtist = document.getElementById('current-artist');
 const currentCover = document.getElementById('current-cover');
 
+// Ensure default cover does not hit external placeholder
+if (currentCover) {
+    currentCover.src = sanitizeImage(currentCover.getAttribute('src'), '♪', 50);
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
+    loadSavedTheme();
     loadArtists(currentCategory);
     setupEventListeners();
-    updatePlayerDisplay();
 });
 
-// Load artists for category
+// Kategoriye göre sanatçılar yükleme
 async function loadArtists(category) {
     let artists = [];
     try {
@@ -94,6 +113,7 @@ async function loadArtists(category) {
     });
 }
 
+// Arama API'si
 async function searchArtistsAPI(query) {
     try {
         const res = await fetch(`${API_URL}/artists/search?q=${encodeURIComponent(query)}`);
@@ -111,15 +131,29 @@ async function searchArtistsAPI(query) {
 function createArtistCard(artist) {
     const card = document.createElement('div');
     card.className = 'artist-card';
-    card.innerHTML = `
-        <div class="artist-image">
-            <img src="${artist.image}" alt="${artist.name}" onerror="this.src='https://via.placeholder.com/150x150/333/fff?text=${artist.name.charAt(0)}'">
-        </div>
-        <div class="artist-name">${artist.name}</div>
-    `;
+
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'artist-image';
+
+    const img = document.createElement('img');
+    img.alt = artist.name;
+    img.src = sanitizeImage(artist.image, artist.name, 150);
+    img.onerror = () => {
+        img.onerror = null; // avoid infinite loop if placeholder fails
+        img.src = placeholderSvg(artist.name?.charAt(0) || '♪', 150);
+    };
+
+    imageWrapper.appendChild(img);
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'artist-name';
+    nameEl.textContent = artist.name;
+
+    card.appendChild(imageWrapper);
+    card.appendChild(nameEl);
     
     // Add event listeners
-    card.addEventListener('click', () => playArtist(artist));
+    card.addEventListener('click', (e) => playArtist(artist, e));
     // Context menu disabled for artist cards as requested
     
     return card;
@@ -158,15 +192,18 @@ function setupEventListeners() {
     
     document.getElementById('library-btn').addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.getElementById('library-btn').classList.add('active');
-        showNotification('Müzik Kütüphanesi');
+            // Kütüphane ayrı sayfaya yönlendirilir
+            window.location.href = 'muzik%20kutuphanesi/kutuphane.html';
     });
     
     document.getElementById('users-btn').addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.getElementById('users-btn').classList.add('active');
-        showNotification('Kullanıcılar');
+        // Profil sayfasına yönlendirme
+        window.location.href = 'profil/profil.html';
     });
+    
+    // Theme toggle
+    document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
     
     // Context menu items
     setupContextMenuItems();
@@ -290,7 +327,7 @@ function setupContextMenuItems() {
 }
 
 // Player functions
-function playArtist(artist) {
+function playArtist(artist, clickEvent) {
     // Artist'e tıklanınca API'den şarkıları getir, yoksa yerel davranışa düş
     (async () => {
         try {
@@ -325,8 +362,8 @@ function playArtist(artist) {
         // Oynatma animasyonu
         const allCards = document.querySelectorAll('.artist-card');
         allCards.forEach(card => card.classList.remove('playing'));
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('playing');
+        if (clickEvent && clickEvent.currentTarget) {
+            clickEvent.currentTarget.classList.add('playing');
         }
     })();
 }
@@ -530,6 +567,91 @@ document.addEventListener('mousemove', (e) => {
     cursorElement.style.left = (e.clientX - 10) + 'px';
     cursorElement.style.top = (e.clientY - 10) + 'px';
 });
+
+// Theme Toggle Functions
+function toggleTheme() {
+    isDarkTheme = !isDarkTheme;
+    applyTheme();
+    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+}
+
+function applyTheme() {
+    const themeIcon = document.querySelector('#theme-toggle-btn i');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Fade out effect before changing
+    if (mainContent) {
+        mainContent.style.opacity = '0';
+        setTimeout(() => {
+            if (isDarkTheme) {
+                document.body.classList.remove('light-theme');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                document.body.classList.add('light-theme');
+                themeIcon.className = 'fas fa-moon';
+            }
+            // Fade in effect after changing
+            mainContent.style.opacity = '1';
+        }, 150);
+    } else {
+        if (isDarkTheme) {
+            document.body.classList.remove('light-theme');
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            document.body.classList.add('light-theme');
+            themeIcon.className = 'fas fa-moon';
+        }
+    }
+}
+
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        isDarkTheme = false;
+        applyTheme();
+    }
+}
+
+// Floating Bubbles
+function createBubble() {
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble');
+    
+    // Random size between 15-35px
+    const size = Math.random() * 20 + 15;
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    
+    // Random horizontal position
+    bubble.style.left = Math.random() * 100 + '%';
+    
+    // Random animation duration between 6-10 seconds
+    const duration = Math.random() * 4 + 6;
+    bubble.style.animationDuration = duration + 's';
+    
+    // Pop bubble on click
+    bubble.addEventListener('click', function() {
+        this.classList.add('pop');
+        setTimeout(() => this.remove(), 300);
+    });
+    
+    document.body.appendChild(bubble);
+    
+    // Remove bubble after animation
+    setTimeout(() => {
+        if (bubble.parentElement) {
+            bubble.remove();
+        }
+    }, duration * 1000);
+}
+
+// Create bubbles periodically
+setInterval(createBubble, 2000);
+
+// Create initial bubbles
+for (let i = 0; i < 3; i++) {
+    setTimeout(() => createBubble(), i * 600);
+}
 
 console.log('Müzik uygulaması yüklendi! 🎵');
 console.log('Klavye kısayolları:');
