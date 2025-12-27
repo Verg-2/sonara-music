@@ -7,6 +7,27 @@ function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
   const isLight = saved === 'light';
   document.body.classList.toggle('light-theme', isLight);
+  // Theme toggle ikonu güncelle
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+    }
+  }
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+    }
+  }
 }
 
 function initForm() {
@@ -71,4 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSavedTheme();
   initForm();
   initSocialButtons();
+  // Theme toggle button
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
 });

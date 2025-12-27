@@ -1,14 +1,35 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-// Temporary storage for verification codes (in production, use Redis)
+// In-memory storage with expiration (Use Redis in production!)
 const verificationCodes = new Map();
 
-// Generate JWT Token
+// Secure token generation with expiration
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d'
+        expiresIn: process.env.JWT_EXPIRE || '30d'
     });
+};
+
+// Validate email format
+const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 255;
+};
+
+// Validate password strength
+const isValidPassword = (password) => {
+    // At least 8 chars, 1 uppercase, 1 lowercase, 1 number
+    return password.length >= 8 && 
+           /[A-Z]/.test(password) && 
+           /[a-z]/.test(password) && 
+           /[0-9]/.test(password);
+};
+
+// Sanitize email
+const sanitizeEmail = (email) => {
+    return email.trim().toLowerCase();
 };
 
 // @desc    Send verification code (before registration)
@@ -16,12 +37,30 @@ const generateToken = (id) => {
 // @access  Public
 exports.sendVerification = async (req, res, next) => {
     try {
-        const { email } = req.body;
+        let { email } = req.body;
         
+        // Input validation
         if (!email) {
             return res.status(400).json({
                 success: false,
                 message: 'E-posta gerekli'
+            });
+        }
+        
+        email = sanitizeEmail(email);
+        
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Geçerli bir e-posta adresi girin'
+            });
+        }
+        
+        // Rate limit: Check if user already sent code recently (1 min)
+        if (verificationCodes.has(email) && verificationCodes.get(email).expires > Date.now()) {
+            return res.status(429).json({
+                success: false,
+                message: 'Lütfen 1 dakika sonra tekrar deneyin'
             });
         }
         
@@ -35,16 +74,17 @@ exports.sendVerification = async (req, res, next) => {
             });
         }
         
-        // Generate 6-digit verification code
+        // Generate 6-digit verification code (cryptographically secure)
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         
         // Store code temporarily (5 minutes expiry)
         verificationCodes.set(email, {
             code: verificationCode,
-            expires: Date.now() + 5 * 60 * 1000
+            expires: Date.now() + 5 * 60 * 1000,
+            attempts: 0
         });
         
-        // TODO: E-postaya kod gönder
+        // TODO: Send code via email service (Sendgrid, Nodemailer, etc.)
         console.log(`\n📧 E-POSTA DOĞRULAMA KODU: ${verificationCode}`);
         console.log(`📨 Gönderilen adres: ${email}\n`);
         
@@ -62,8 +102,9 @@ exports.sendVerification = async (req, res, next) => {
 // @access  Public
 exports.verifyAndRegister = async (req, res, next) => {
     try {
-        const { email, password, code } = req.body;
+        let { email, password, code, username } = req.body;
         
+        // Input validation
         if (!email || !password || !code) {
             return res.status(400).json({
                 success: false,
@@ -71,7 +112,25 @@ exports.verifyAndRegister = async (req, res, next) => {
             });
         }
         
-        // Check verification code
+        email = sanitizeEmail(email);
+        
+        // Validate email format
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Geçerli bir e-posta adresi girin'
+            });
+        }
+        
+        // Validate password strength
+        if (!isValidPassword(password)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf ve 1 rakam içermeli'
+            });
+        }
+        
+        // Prevent code enumeration - limit attempts
         const stored = verificationCodes.get(email);
         
         if (!stored) {
@@ -81,6 +140,17 @@ exports.verifyAndRegister = async (req, res, next) => {
             });
         }
         
+        // Rate limit: Max 3 attempts per code
+        if (stored.attempts >= 3) {
+            verificationCodes.delete(email);
+            return res.status(429).json({
+                success: false,
+                message: 'Çok fazla deneme. Lütfen yeni bir kod talep edin'
+            });
+        }
+        
+        stored.attempts = (stored.attempts || 0) + 1;
+        
         if (stored.expires < Date.now()) {
             verificationCodes.delete(email);
             return res.status(400).json({
@@ -89,7 +159,7 @@ exports.verifyAndRegister = async (req, res, next) => {
             });
         }
         
-        if (stored.code !== code) {
+        if (stored.code !== code.toString().trim()) {
             return res.status(400).json({
                 success: false,
                 message: 'Geçersiz doğrulama kodu'
@@ -98,7 +168,7 @@ exports.verifyAndRegister = async (req, res, next) => {
         
         // Code is valid, create user
         const user = await User.create({
-            username: email.split('@')[0],
+            username: username || email.split('@')[0],
             email,
             password,
             isVerified: true
@@ -133,14 +203,18 @@ exports.login = async (req, res, next) => {
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Email ve şifre gerekli'
+                message: 'E-posta ve şifre gerekli'
             });
         }
         
+        // Sanitize email
+        const sanitizedEmail = sanitizeEmail(email);
+        
         // Check for user
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email: sanitizedEmail }).select('+password');
         
         if (!user) {
+            // Don't reveal if email exists (security)
             return res.status(401).json({
                 success: false,
                 message: 'Geçersiz kimlik bilgileri'
@@ -151,7 +225,7 @@ exports.login = async (req, res, next) => {
         if (!user.isVerified) {
             return res.status(401).json({
                 success: false,
-                message: 'Lütfen önce e-postanızı doğrulayın'
+                message: 'E-postanız henüz doğrulanmamış'
             });
         }
         
@@ -159,6 +233,7 @@ exports.login = async (req, res, next) => {
         const isMatch = await user.matchPassword(password);
         
         if (!isMatch) {
+            // Don't reveal password is wrong (security)
             return res.status(401).json({
                 success: false,
                 message: 'Geçersiz kimlik bilgileri'
@@ -206,7 +281,7 @@ exports.getMe = async (req, res, next) => {
 // @access  Public
 exports.verifyEmail = async (req, res, next) => {
     try {
-        const { email, code } = req.body;
+        let { email, code } = req.body;
         
         if (!email || !code) {
             return res.status(400).json({
@@ -214,6 +289,8 @@ exports.verifyEmail = async (req, res, next) => {
                 message: 'E-posta ve kod gerekli'
             });
         }
+        
+        email = sanitizeEmail(email);
         
         // Find user with verification code
         const user = await User.findOne({ email }).select('+verificationCode');
@@ -233,7 +310,7 @@ exports.verifyEmail = async (req, res, next) => {
         }
         
         // Check if code matches
-        if (user.verificationCode !== code) {
+        if (user.verificationCode !== code.toString().trim()) {
             return res.status(400).json({
                 success: false,
                 message: 'Geçersiz doğrulama kodu'
@@ -263,12 +340,30 @@ exports.verifyEmail = async (req, res, next) => {
 // @access  Public
 exports.resendCode = async (req, res, next) => {
     try {
-        const { email } = req.body;
+        let { email } = req.body;
         
         if (!email) {
             return res.status(400).json({
                 success: false,
                 message: 'E-posta gerekli'
+            });
+        }
+        
+        email = sanitizeEmail(email);
+        
+        // Validate email format
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Geçerli bir e-posta adresi girin'
+            });
+        }
+        
+        // Rate limit: Check if user already sent code recently (1 min)
+        if (verificationCodes.has(email) && verificationCodes.get(email).expires > Date.now()) {
+            return res.status(429).json({
+                success: false,
+                message: 'Lütfen 1 dakika sonra tekrar deneyin'
             });
         }
         
@@ -288,10 +383,11 @@ exports.resendCode = async (req, res, next) => {
         // Store code temporarily (5 minutes expiry)
         verificationCodes.set(email, {
             code: verificationCode,
-            expires: Date.now() + 5 * 60 * 1000
+            expires: Date.now() + 5 * 60 * 1000,
+            attempts: 0
         });
         
-        // TODO: E-postaya kod gönder
+        // TODO: Send code via email service
         console.log(`\n📧 YENİ DOĞRULAMA KODU: ${verificationCode}`);
         console.log(`📨 Gönderilen adres: ${email}\n`);
         

@@ -1,5 +1,70 @@
 const Song = require('../models/Song');
 
+// Helper: Convert relative audioUrl to absolute URL
+const getAbsoluteAudioUrl = (audioUrl, req) => {
+    if (!audioUrl) return audioUrl;
+    
+    // If already absolute URL, return as is
+    if (audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
+        return audioUrl;
+    }
+    
+    // Build absolute URL
+    // Use req.protocol (handles http/https) or default to http
+    const protocol = (req.secure || req.headers['x-forwarded-proto'] === 'https') ? 'https' : 'http';
+    const host = req.get('host') || req.headers.host || '127.0.0.1:5000';
+    
+    // If starts with /, it's already a path
+    if (audioUrl.startsWith('/')) {
+        return `${protocol}://${host}${audioUrl}`;
+    }
+    
+    // Otherwise, assume it's a filename in /api/media
+    return `${protocol}://${host}/api/media/${audioUrl}`;
+};
+
+// Helper: Convert relative image URL to absolute URL
+const getAbsoluteImageUrl = (imageUrl, req) => {
+    if (!imageUrl) return imageUrl;
+    
+    // If already absolute URL or data URI, return as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:')) {
+        return imageUrl;
+    }
+    
+    // Build absolute URL
+    // Use req.protocol (handles http/https) or default to http
+    const protocol = (req.secure || req.headers['x-forwarded-proto'] === 'https') ? 'https' : 'http';
+    const host = req.get('host') || req.headers.host || '127.0.0.1:5000';
+    
+    // If starts with /, it's already a path
+    if (imageUrl.startsWith('/')) {
+        return `${protocol}://${host}${imageUrl}`;
+    }
+    
+    // Otherwise, assume it's a filename in /api/media
+    return `${protocol}://${host}/api/media/${imageUrl}`;
+};
+
+// Helper: Transform song object to include absolute URLs
+const transformSong = (song, req) => {
+    if (!song) return song;
+    
+    const songObj = song.toObject ? song.toObject() : song;
+    
+    if (songObj.audioUrl) {
+        songObj.audioUrl = getAbsoluteAudioUrl(songObj.audioUrl, req);
+    }
+    if (songObj.url) {
+        songObj.url = getAbsoluteAudioUrl(songObj.url, req);
+    }
+    if (songObj.coverImage) {
+        songObj.coverImage = getAbsoluteImageUrl(songObj.coverImage, req);
+    }
+    
+    return songObj;
+};
+
 // @desc    Get all songs
 // @route   GET /api/songs
 // @access  Public
@@ -19,13 +84,16 @@ exports.getSongs = async (req, res, next) => {
         
         const total = await Song.countDocuments(query);
         
+        // Transform songs to include absolute URLs
+        const transformedSongs = songs.map(song => transformSong(song, req));
+        
         res.status(200).json({
             success: true,
-            count: songs.length,
+            count: transformedSongs.length,
             total,
             page: parseInt(page),
             pages: Math.ceil(total / parseInt(limit)),
-            data: songs
+            data: transformedSongs
         });
     } catch (error) {
         next(error);
@@ -47,9 +115,12 @@ exports.getSong = async (req, res, next) => {
             });
         }
         
+        // Transform song to include absolute URLs
+        const transformedSong = transformSong(song, req);
+        
         res.status(200).json({
             success: true,
-            data: song
+            data: transformedSong
         });
     } catch (error) {
         next(error);
@@ -63,9 +134,12 @@ exports.createSong = async (req, res, next) => {
     try {
         const song = await Song.create(req.body);
         
+        // Transform song to include absolute URLs
+        const transformedSong = transformSong(song, req);
+        
         res.status(201).json({
             success: true,
-            data: song
+            data: transformedSong
         });
     } catch (error) {
         next(error);
@@ -90,9 +164,12 @@ exports.updateSong = async (req, res, next) => {
             });
         }
         
+        // Transform song to include absolute URLs
+        const transformedSong = transformSong(song, req);
+        
         res.status(200).json({
             success: true,
-            data: song
+            data: transformedSong
         });
     } catch (error) {
         next(error);
@@ -140,9 +217,12 @@ exports.incrementPlayCount = async (req, res, next) => {
             });
         }
         
+        // Transform song to include absolute URLs
+        const transformedSong = transformSong(song, req);
+        
         res.status(200).json({
             success: true,
-            data: song
+            data: transformedSong
         });
     } catch (error) {
         next(error);

@@ -1,4 +1,13 @@
 // Placeholder helpers to avoid external image errors
+// Tema tercihini sakla, diğer verileri temizle
+if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+    const savedTheme = localStorage.getItem('theme');
+    localStorage.clear();
+    if (savedTheme) {
+        localStorage.setItem('theme', savedTheme);
+    }
+}
+
 const placeholderSvg = (text = '♪', size = 150) => {
     const safeText = (text || '♪').toString().slice(0, 3);
     const fontSize = Math.floor(size / 3);
@@ -66,8 +75,16 @@ let isDarkTheme = true;
 let isLoadingArtists = false;
 let artistsFetchController = null;
 
-// Backend API base URL
-const API_URL = 'http://localhost:5000/api';
+// Audio player
+let audioPlayer = new Audio();
+let playlist = [];
+let currentSongIndex = 0;
+let isMuted = false;
+let currentVolume = 1.0;
+
+// Backend API base URL - Use current origin to avoid CORS issues
+// This ensures the same protocol and host as the frontend
+const API_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
 // DOM elements
 // Yalnızca ana sayfadaki kategori butonları (data-category) hedeflenir
@@ -85,6 +102,10 @@ const volumeBtn = document.getElementById('volume-btn');
 const currentTitle = document.getElementById('current-title');
 const currentArtist = document.getElementById('current-artist');
 const currentCover = document.getElementById('current-cover');
+const currentTime = document.getElementById('current-time');
+const totalTime = document.getElementById('total-time');
+const progressFill = document.getElementById('progress-fill');
+const progressBar = document.getElementById('progress-bar');
 
 // Ensure default cover does not hit external placeholder
 if (currentCover) {
@@ -93,9 +114,20 @@ if (currentCover) {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM yüklendi, başlatılıyor...');
+    console.log('Player butonları:', {
+        playPauseBtn: !!playPauseBtn,
+        prevBtn: !!prevBtn,
+        nextBtn: !!nextBtn,
+        shuffleBtn: !!shuffleBtn,
+        repeatBtn: !!repeatBtn,
+        favoriteBtn: !!favoriteBtn,
+        volumeBtn: !!volumeBtn
+    });
     loadSavedTheme();
     loadArtists(currentCategory);
     setupEventListeners();
+    setupAudioPlayer();
 });
 
 // Kategoriye göre sanatçılar yükleme
@@ -112,13 +144,34 @@ async function loadArtists(category) {
     artistsGrid.classList.add('loading');
 
     let artists = [];
+    let apiSuccess = false;
     try {
-        const res = await fetch(`${API_URL}/artists?category=${encodeURIComponent(category)}`, { signal });
+        // Timeout ile API isteği
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 saniye timeout
+        
+        const res = await fetch(`${API_URL}/artists?category=${encodeURIComponent(category)}`, { 
+            signal: controller.signal 
+        });
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         const data = await res.json();
+        if (!data || !data.success) {
+            throw new Error(data?.message || 'API yanıtı geçersiz');
+        }
+        
         artists = data?.data || [];
+        apiSuccess = true;
+        console.log(`✓ API başarılı: ${artists.length} sanatçı yüklendi`);
     } catch (err) {
         if (err.name !== 'AbortError') {
-            console.warn('API erişilemedi, yerel veriye düşüyor:', err);
+            // Yerel veriye düş
+            console.warn('⚠ API Hatası:', err.message || 'Bağlantı başarısız');
+            console.log('💾 Yerel veriye geçiliyor...');
             artists = artistsData[category] || artistsData.odaklanma || [];
         } else {
             return; // iptal edildi
@@ -129,23 +182,38 @@ async function loadArtists(category) {
     const frag = document.createDocumentFragment();
     artists.forEach(artist => {
         const artistCard = createArtistCard(artist);
-        frag.appendChild(artistCard);
+        if (artistCard) {
+            frag.appendChild(artistCard);
+        }
     });
     artistsGrid.replaceChildren(frag);
 
     // Yükleme bitti
     isLoadingArtists = false;
     artistsGrid.classList.remove('loading');
+    
+    if (!apiSuccess) {
+        showNotification('⚠ Backend bağlantısı yok - yerel veriler kullanılıyor');
+    }
 }
 
 // Arama API'si
 async function searchArtistsAPI(query) {
     try {
-        const res = await fetch(`${API_URL}/artists/search?q=${encodeURIComponent(query)}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(`${API_URL}/artists/search?q=${encodeURIComponent(query)}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
         const data = await res.json();
+        console.log(`✓ Arama başarılı: "${query}" için sonuç bulundu`);
         return data?.data || [];
     } catch (err) {
-        console.warn('Arama API erişilemedi, yerel filtre uygulanıyor:', err);
+        console.warn('⚠ Arama API hatası:', err.message);
+        console.log('💾 Yerel arama yapılıyor...');
         // Yerel veri üzerinden filtreleme (fallback)
         const all = artistsData[currentCategory] || artistsData.odaklanma || [];
         return all.filter(a => a.name.toLowerCase().includes(query.toLowerCase()));
@@ -154,6 +222,11 @@ async function searchArtistsAPI(query) {
 
 // Create artist card
 function createArtistCard(artist) {
+    if (!artist || !artist.name) {
+        console.warn('Invalid artist data:', artist);
+        return null;
+    }
+    
     const card = document.createElement('div');
     card.className = 'artist-card';
 
@@ -161,7 +234,7 @@ function createArtistCard(artist) {
     imageWrapper.className = 'artist-image';
 
     const img = document.createElement('img');
-    img.alt = artist.name;
+    img.alt = artist.name || 'Artist';
     img.src = sanitizeImage(artist.image, artist.name, 150);
     img.loading = 'lazy';
     img.decoding = 'async';
@@ -203,35 +276,58 @@ function setupEventListeners() {
     searchInput.addEventListener('input', handleSearch);
     
     // Player controls
-    playPauseBtn.addEventListener('click', togglePlayPause);
-    prevBtn.addEventListener('click', previousSong);
-    nextBtn.addEventListener('click', nextSong);
-    shuffleBtn.addEventListener('click', toggleShuffle);
-    repeatBtn.addEventListener('click', toggleRepeat);
-    favoriteBtn.addEventListener('click', toggleFavorite);
-    volumeBtn.addEventListener('click', toggleMute);
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        console.log('✓ Play/Pause butonu bağlandı');
+    } else {
+        console.error('✗ Play/Pause butonu bulunamadı!');
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', previousSong);
+        console.log('✓ Previous butonu bağlandı');
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', nextSong);
+        console.log('✓ Next butonu bağlandı');
+    }
+    
+    if (shuffleBtn) shuffleBtn.addEventListener('click', toggleShuffle);
+    if (repeatBtn) repeatBtn.addEventListener('click', toggleRepeat);
+    if (favoriteBtn) favoriteBtn.addEventListener('click', toggleFavorite);
+    if (volumeBtn) volumeBtn.addEventListener('click', toggleMute);
     
     // Navigation
-    document.getElementById('home-btn').addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.getElementById('home-btn').classList.add('active');
-        showNotification('Ana Sayfa');
-    });
+    const homeBtn = document.getElementById('home-btn');
+    const libraryBtn = document.getElementById('library-btn');
+    const usersBtn = document.getElementById('users-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
     
-    document.getElementById('library-btn').addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            // Kütüphane ayrı sayfaya yönlendirilir
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            homeBtn.classList.add('active');
+            showNotification('Ana Sayfa');
+        });
+    }
+    
+    if (libraryBtn) {
+        libraryBtn.addEventListener('click', () => {
             window.location.href = 'muzik%20kutuphanesi/kutuphane.html';
-    });
+        });
+    }
     
-    document.getElementById('users-btn').addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        // Profil sayfasına yönlendirme
-        window.location.href = 'profil/profil.html';
-    });
+    if (usersBtn) {
+        usersBtn.addEventListener('click', () => {
+            window.location.href = 'profil/profil.html';
+        });
+    }
     
     // Theme toggle
-    document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', toggleTheme);
+    }
     
     // Context menu items
     setupContextMenuItems();
@@ -255,7 +351,9 @@ async function handleSearch(e) {
     artistsGrid.innerHTML = '';
     results.forEach(artist => {
         const artistCard = createArtistCard(artist);
-        artistsGrid.appendChild(artistCard);
+        if (artistCard) {
+            artistsGrid.appendChild(artistCard);
+        }
     });
 }
 
@@ -271,29 +369,41 @@ function showContextMenu(e, artist) {
 
 // Hide context menu
 function hideContextMenu() {
-    document.getElementById('context-menu').style.display = 'none';
+    const menu = document.getElementById('context-menu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
 }
 
 // Setup context menu items
 function setupContextMenuItems() {
-    document.getElementById('play-radio').addEventListener('click', () => {
-        const artist = contextMenu.dataset.artist;
-        showNotification(`${artist} radyosu başlatılıyor...`);
-        hideContextMenu();
-    });
+    const playRadio = document.getElementById('play-radio');
+    const playAfter = document.getElementById('play-after');
     
-    document.getElementById('play-after').addEventListener('click', () => {
-        const artist = contextMenu.dataset.artist;
-        showNotification(`${artist} sıradaki şarkı olarak eklendi`);
-        hideContextMenu();
-    });
+    if (playRadio) {
+        playRadio.addEventListener('click', () => {
+            const artist = contextMenu.dataset.artist;
+            showNotification(`${artist} radyosu başlatılıyor...`);
+            hideContextMenu();
+        });
+    }
     
-    document.getElementById('add-queue').addEventListener('click', () => {
-        const artist = contextMenu.dataset.artist;
-        showNotification(`${artist} sıraya eklendi`);
-        hideContextMenu();
-    });
+    if (playAfter) {
+        playAfter.addEventListener('click', () => {
+            const artist = contextMenu.dataset.artist;
+            showNotification(`${artist} sıradaki şarkı olarak eklendi`);
+            hideContextMenu();
+        });
+    }
     
+    const addQueue = document.getElementById('add-queue');
+    if (addQueue) {
+        addQueue.addEventListener('click', () => {
+            const artist = contextMenu.dataset.artist;
+            showNotification(`${artist} sıraya eklendi`);
+            hideContextMenu();
+        });
+    }
     document.getElementById('like-song').addEventListener('click', () => {
         const artist = contextMenu.dataset.artist;
         showNotification(`${artist} beğenilen şarkılara eklendi`);
@@ -355,124 +465,367 @@ function setupContextMenuItems() {
 }
 
 // Player functions
-function playArtist(artist, clickEvent) {
+async function playArtist(artist, clickEvent) {
     // Artist'e tıklanınca API'den şarkıları getir, yoksa yerel davranışa düş
-    (async () => {
-        try {
-            const songs = await fetchSongsForArtist(artist);
-            if (songs && songs.length > 0) {
-                const song = songs[0];
-                currentSong.title = song.title || artist.name;
-                currentSong.artist = (song.artist && (song.artist.name || song.artist)) || artist.name;
-                updatePlayerDisplay();
-                isPlaying = true;
-                updatePlayButton();
-                // Sunucuya dinlenme sayısını işaretle
-                if (song._id) {
-                    await playSongOnServer(song._id);
-                }
-            } else {
-                // Fallback: önceki basit davranış
-                currentSong.title = artist.name;
-                currentSong.artist = "Şarkı Çalıyor...";
-                updatePlayerDisplay();
-                isPlaying = true;
-                updatePlayButton();
-            }
-        } catch (err) {
-            console.warn('Şarkı yüklenemedi, yerel davranışa düşülüyor:', err);
+    try {
+        const songs = await fetchSongsForArtist(artist);
+        if (songs && songs.length > 0) {
+            playlist = songs;
+            currentSongIndex = 0;
+            playSongAtIndex(currentSongIndex);
+        } else {
+            // Fallback: önceki basit davranış
             currentSong.title = artist.name;
             currentSong.artist = "Şarkı Çalıyor...";
             updatePlayerDisplay();
             isPlaying = true;
             updatePlayButton();
         }
-        // Oynatma animasyonu
-        const allCards = document.querySelectorAll('.artist-card');
-        allCards.forEach(card => card.classList.remove('playing'));
-        if (clickEvent && clickEvent.currentTarget) {
-            clickEvent.currentTarget.classList.add('playing');
+    } catch (err) {
+        console.warn('Şarkı yüklenemedi, yerel davranışa düşülüyor:', err);
+        currentSong.title = artist.name;
+        currentSong.artist = "Şarkı Çalıyor...";
+        updatePlayerDisplay();
+        isPlaying = true;
+        updatePlayButton();
+    }
+    
+    // Oynatma animasyonu
+    const allCards = document.querySelectorAll('.artist-card');
+    allCards.forEach(card => card.classList.remove('playing'));
+    if (clickEvent && clickEvent.currentTarget) {
+        clickEvent.currentTarget.classList.add('playing');
+    }
+}
+
+function playSongAtIndex(index) {
+    if (index < 0 || index >= playlist.length) return;
+    
+    const song = playlist[index];
+    currentSongIndex = index;
+    console.log('DEBUG: Song object:', song);
+    console.log('DEBUG: Song ID:', song._id);
+    currentSong.title = song.title || 'Bilinmeyen Şarkı';
+    currentSong.artist = (song.artist && (song.artist.name || song.artist)) || 'Bilinmeyen Sanatçı';
+    
+    // Önce görsel güncelle
+    updatePlayerDisplay();
+    isPlaying = true;
+    updatePlayButton();
+    
+    // Şarkının URL'si varsa çal (opsiyonel)
+    if (song.url || song.audioUrl) {
+        const audioUrl = song.url || song.audioUrl;
+        console.log('Şarkı yükleniyor:', audioUrl);
+        audioPlayer.src = audioUrl;
+        audioPlayer.play().catch(err => {
+            console.warn('Ses dosyası çalınamadı (URL geçersiz veya yok), demo modunda devam ediliyor:', err.message);
+            // Hata olsa bile görsel olarak oynatmaya devam et
+        });
+    } else {
+        console.log('Demo mod: Ses dosyası URL\'si yok, sadece görsel oynatma');
+        showNotification('🎵 ' + currentSong.title);
+    }
+    
+    // Sunucuya dinlenme sayısını işaretle
+    if (song._id) {
+        console.log('Play isteği gönderiliyor, ID:', song._id);
+        playSongOnServer(song._id);
+    } else {
+        console.warn('⚠️ Song._id yok! Song:', song);
+    }
+}
+
+function setupAudioPlayer() {
+    console.log('Audio player kuruluyor...');
+    
+    // Audio player event listeners
+    audioPlayer.addEventListener('ended', () => {
+        console.log('Şarkı bitti');
+        if (isRepeatOn) {
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+        } else {
+            nextSong();
         }
-    })();
+    });
+    
+    audioPlayer.addEventListener('play', () => {
+        console.log('Audio play event');
+        isPlaying = true;
+        updatePlayButton();
+    });
+    
+    audioPlayer.addEventListener('pause', () => {
+        console.log('Audio pause event');
+        isPlaying = false;
+        updatePlayButton();
+    });
+    
+    audioPlayer.addEventListener('timeupdate', () => {
+        // Şarkı süresi güncelleme
+        updateProgressBar();
+    });
+    
+    audioPlayer.addEventListener('loadedmetadata', () => {
+        console.log('Audio metadata yüklendi');
+        if (totalTime && audioPlayer.duration) {
+            totalTime.textContent = formatTime(audioPlayer.duration);
+        }
+    });
+    
+    audioPlayer.addEventListener('error', (e) => {
+        console.warn('Audio yükleme hatası (dosya bulunamadı, demo modda devam):', e.type);
+        // Hata olsa bile görsel oynatmaya devam et, sessiz çalışsın
+    });
+    
+    audioPlayer.addEventListener('loadeddata', () => {
+        console.log('Audio başarıyla yüklendi');
+    });
+    
+    // Progress bar tıklaması
+    if (progressBar) {
+        progressBar.addEventListener('click', (e) => {
+            if (audioPlayer.duration) {
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audioPlayer.currentTime = percent * audioPlayer.duration;
+            }
+        });
+    }
+    
+    // Set initial volume
+    audioPlayer.volume = currentVolume;
+    
+    console.log('Audio player kuruldu');
+}
+
+// Süre formatı: MM:SS
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Progress bar güncelle
+function updateProgressBar() {
+    if (!audioPlayer.duration) return;
+    
+    const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    
+    if (progressFill) {
+        progressFill.style.width = percent + '%';
+    }
+    
+    if (currentTime) {
+        currentTime.textContent = formatTime(audioPlayer.currentTime);
+    }
 }
 
 function togglePlayPause() {
+    console.log('togglePlayPause called', { isPlaying, hasAudioSrc: !!audioPlayer.src });
+    
+    // State'i değiştir
     isPlaying = !isPlaying;
+    
+    // Butonu güncelle
     updatePlayButton();
-    showNotification(isPlaying ? 'Oynatılıyor' : 'Duraklatıldı');
+    
+    // Audio varsa onu da kontrol et
+    if (audioPlayer.src) {
+        if (isPlaying) {
+            audioPlayer.play().catch(err => {
+                console.warn('Oynatma hatası:', err);
+                isPlaying = false;
+                updatePlayButton();
+            });
+        } else {
+            audioPlayer.pause();
+        }
+    }
+    
+    // Bildirimi göster
+    showNotification(isPlaying ? '▶ Oynatılıyor' : '⏸ Duraklatıldı');
 }
 
 function updatePlayButton() {
+    if (!playPauseBtn) {
+        console.warn('playPauseBtn bulunamadı');
+        return;
+    }
     const icon = playPauseBtn.querySelector('i');
-    icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+    if (icon) {
+        if (isPlaying) {
+            icon.className = 'fas fa-pause';
+        } else {
+            icon.className = 'fas fa-play';
+        }
+        console.log('Buton güncellendi:', isPlaying ? 'PAUSE' : 'PLAY');
+    } else {
+        console.warn('Icon elementi bulunamadı');
+    }
 }
 
 function previousSong() {
+    console.log('previousSong called', { playlistLength: playlist.length, currentSongIndex, isShuffleOn });
+    if (playlist.length === 0) {
+        showNotification('Çalma listesi boş');
+        return;
+    }
+    
+    if (isShuffleOn) {
+        // Karıştırma açıksa rastgele şarkı seç
+        const randomIndex = Math.floor(Math.random() * playlist.length);
+        playSongAtIndex(randomIndex);
+    } else {
+        // Normal sırada önceki şarkıya geç
+        currentSongIndex--;
+        if (currentSongIndex < 0) {
+            currentSongIndex = playlist.length - 1;
+        }
+        playSongAtIndex(currentSongIndex);
+    }
     showNotification('Önceki şarkı');
-    // Add logic for previous song
 }
 
 function nextSong() {
+    console.log('nextSong called', { playlistLength: playlist.length, currentSongIndex, isShuffleOn });
+    if (playlist.length === 0) {
+        showNotification('Çalma listesi boş');
+        return;
+    }
+    
+    if (isShuffleOn) {
+        // Karıştırma açıksa rastgele şarkı seç
+        const randomIndex = Math.floor(Math.random() * playlist.length);
+        playSongAtIndex(randomIndex);
+    } else {
+        // Normal sırada sonraki şarkıya geç
+        currentSongIndex++;
+        if (currentSongIndex >= playlist.length) {
+            currentSongIndex = 0;
+        }
+        playSongAtIndex(currentSongIndex);
+    }
     showNotification('Sonraki şarkı');
-    // Add logic for next song
 }
 
 function toggleShuffle() {
+    if (!shuffleBtn) return;
     isShuffleOn = !isShuffleOn;
     shuffleBtn.classList.toggle('active', isShuffleOn);
     showNotification(isShuffleOn ? 'Karıştırma açık' : 'Karıştırma kapalı');
 }
 
 function toggleRepeat() {
+    if (!repeatBtn) return;
     isRepeatOn = !isRepeatOn;
     repeatBtn.classList.toggle('active', isRepeatOn);
     showNotification(isRepeatOn ? 'Tekrar açık' : 'Tekrar kapalı');
 }
 
 function toggleFavorite() {
+    if (!favoriteBtn) return;
     favoriteBtn.classList.toggle('active');
     const isFavorite = favoriteBtn.classList.contains('active');
     showNotification(isFavorite ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı');
 }
 
 function toggleMute() {
+    if (!volumeBtn) return;
     const icon = volumeBtn.querySelector('i');
-    if (icon.classList.contains('fa-volume-up')) {
+    if (!icon) return;
+    if (!isMuted) {
+        // Sesi kapat
+        currentVolume = audioPlayer.volume;
+        audioPlayer.volume = 0;
+        isMuted = true;
         icon.className = 'fas fa-volume-mute';
         showNotification('Ses kapatıldı');
     } else {
+        // Sesi aç
+        audioPlayer.volume = currentVolume;
+        isMuted = false;
         icon.className = 'fas fa-volume-up';
         showNotification('Ses açıldı');
     }
 }
 
 function updatePlayerDisplay() {
-    currentTitle.textContent = currentSong.title;
-    currentArtist.textContent = currentSong.artist;
+    if (currentTitle) currentTitle.textContent = currentSong.title;
+    if (currentArtist) currentArtist.textContent = currentSong.artist;
+    
+    // Progress bar'ı sıfırla
+    if (progressFill) {
+        progressFill.style.width = '0%';
+    }
+    if (currentTime) {
+        currentTime.textContent = '0:00';
+    }
+    if (totalTime) {
+        totalTime.textContent = '0:00';
+    }
 }
 
 // Belirli bir artist için şarkıları API'den getir
 async function fetchSongsForArtist(artist) {
     if (artist && artist._id) {
-        const url = `${API_URL}/songs?artist=${encodeURIComponent(artist._id)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        return data?.data || [];
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const url = `${API_URL}/songs?artist=${encodeURIComponent(artist._id)}`;
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            
+            const data = await res.json();
+            if (!data || !data.success) {
+                throw new Error(data?.message || 'API yanıtı geçersiz');
+            }
+            
+            const songs = data?.data || [];
+            console.log(`✓ Şarkılar yüklendi: ${artist.name} - ${songs.length} şarkı`);
+            return songs;
+        } catch (err) {
+            console.warn(`⚠ Şarkı yükleme hatası: ${artist.name}`, err.message);
+            return [];
+        }
     }
-    // Artist id yoksa boş döndür (ileride yerel mapping eklenebilir)
     return [];
 }
 
 // Sunucuya dinlenme sayısını artırma isteği gönder
 async function playSongOnServer(songId) {
     try {
-        const res = await fetch(`${API_URL}/songs/${songId}/play`, { method: 'POST' });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(`${API_URL}/songs/${songId}/play`, { 
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         const data = await res.json();
-        if (!data?.success) {
-            console.warn('Play isteği başarısız:', data);
+        if (!data || !data.success) {
+            console.warn('⚠ Play isteği başarısız:', data?.message || 'Bilinmeyen hata');
+        } else {
+            console.log('✓ Play sayısı artırıldı');
         }
     } catch (err) {
-        console.warn('Play isteği gönderilemedi:', err);
+        console.warn('⚠ Play isteği gönderilemedi:', err.message);
     }
 }
 
@@ -516,10 +869,34 @@ function handleKeyboardShortcuts(e) {
     }
 }
 
-// Show notification (disabled)
+// Show notification
 function showNotification(message) {
-    // Notifications globally disabled
-    return;
+    // Önceki notification varsa kaldır
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Yeni notification oluştur
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Animasyonla göster
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // 2 saniye sonra kaldır
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 300);
+    }, 2000);
 }
 
 // Add some visual effects
@@ -605,30 +982,14 @@ function toggleTheme() {
 
 function applyTheme() {
     const themeIcon = document.querySelector('#theme-toggle-btn i');
-    const mainContent = document.querySelector('.main-content');
     
-    // Fade out effect before changing
-    if (mainContent) {
-        mainContent.style.opacity = '0';
-        setTimeout(() => {
-            if (isDarkTheme) {
-                document.body.classList.remove('light-theme');
-                themeIcon.className = 'fas fa-sun';
-            } else {
-                document.body.classList.add('light-theme');
-                themeIcon.className = 'fas fa-moon';
-            }
-            // Fade in effect after changing
-            mainContent.style.opacity = '1';
-        }, 150);
+    // Renkleri hemen değiştir, animasyon yok
+    if (isDarkTheme) {
+        document.body.classList.remove('light-theme');
+        if (themeIcon) themeIcon.className = 'fas fa-sun';
     } else {
-        if (isDarkTheme) {
-            document.body.classList.remove('light-theme');
-            themeIcon.className = 'fas fa-sun';
-        } else {
-            document.body.classList.add('light-theme');
-            themeIcon.className = 'fas fa-moon';
-        }
+        document.body.classList.add('light-theme');
+        if (themeIcon) themeIcon.className = 'fas fa-moon';
     }
 }
 
@@ -636,7 +997,18 @@ function loadSavedTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         isDarkTheme = false;
-        applyTheme();
+        document.body.classList.add('light-theme');
+        const themeIcon = document.querySelector('#theme-toggle-btn i');
+        if (themeIcon) {
+            themeIcon.className = 'fas fa-moon';
+        }
+    } else {
+        isDarkTheme = true;
+        document.body.classList.remove('light-theme');
+        const themeIcon = document.querySelector('#theme-toggle-btn i');
+        if (themeIcon) {
+            themeIcon.className = 'fas fa-sun';
+        }
     }
 }
 

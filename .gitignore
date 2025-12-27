@@ -31,3 +31,14 @@ Thumbs.db
 # Database
 *.db
 *.sqlite
+
+# Uploads - Kullanıcı yüklemeleri
+backend/uploads/
+uploads/
+
+# Rust build artifacts
+rust-service/target/
+rust-service/Cargo.lock
+
+# Test files
+test-*.html

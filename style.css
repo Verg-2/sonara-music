@@ -36,9 +36,9 @@ body.light-theme {
     --text-secondary: #666;
     --border: #EF5A6F;
     --control-border: rgba(239, 90, 111, 0.3);
-    --control-bg: rgba(239, 90, 111, 0.03);
-    --card-bg: rgba(0, 0, 0, 0.03);
-    --card-hover: rgba(0, 0, 0, 0.07);
+    --control-bg: rgba(239, 90, 111, 0.08);
+    --card-bg: rgba(239, 90, 111, 0.04);
+    --card-hover: rgba(239, 90, 111, 0.12);
 }
 
 * {
@@ -117,7 +117,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     display: flex;
     height: 100vh;
     background: var(--bg-main);
-    transition: background 0.3s ease;
+    transition: background 0.5s ease;
 }
 
 /* Sidebar */
@@ -138,6 +138,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     margin-bottom: 40px;
 }
 
+/* removed logo-img custom styles to restore original UI */
+
 .logo-icon {
     width: 50px;
     height: 50px;
@@ -149,10 +151,12 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
+    color: #fff;
     transition: transform 0.2s ease,
-                box-shadow 0.3s ease,
-                background-color 0.3s ease,
-                border-color 0.3s ease;
+                box-shadow 0.5s ease,
+                background-color 0.5s ease,
+                border-color 0.5s ease,
+                color 0.5s ease;
 }
 
 .logo-icon:hover {
@@ -175,18 +179,20 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     justify-content: center;
     border-radius: 50%;
     cursor: pointer;
-    transition: background-color 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease,
+    transition: background-color 0.5s ease,
+                border-color 0.5s ease,
+                box-shadow 0.5s ease,
                 transform 0.2s ease;
     border: 2px solid transparent;
+    color: var(--accent);
 }
 
 .nav-item:hover,
 .nav-item.active {
     background: var(--accent);
     border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 15px rgba(239, 90, 111, 0.4);
+    color: #fff;
 }
 
 .profile-section {
@@ -204,9 +210,11 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+    color: #fff;
     transition: transform 0.2s ease,
-                box-shadow 0.3s ease,
-                background-color 0.3s ease;
+                box-shadow 0.5s ease,
+                background-color 0.5s ease,
+                color 0.5s ease;
 }
 
 .profile-icon:hover {
@@ -220,7 +228,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     padding: 20px;
     overflow-y: auto;
     background: var(--bg-main);
-    transition: opacity 0.3s ease;
+    transition: background 0.5s ease,
+                color 0.5s ease;
 }
 
 .header {
@@ -230,7 +239,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     margin-bottom: 40px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--text-secondary);
-    transition: border-color 0.4s ease;
+    transition: border-color 0.5s ease,
+                color 0.5s ease;
 }
 
 .category-buttons {
@@ -246,11 +256,11 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     border: 2px solid var(--accent);
     border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                border-color 0.3s ease,
+    transition: background-color 0.5s ease,
+                color 0.5s ease,
+                border-color 0.5s ease,
                 transform 0.2s ease,
-                box-shadow 0.3s ease;
+                box-shadow 0.5s ease;
     font-size: 14px;
     font-weight: 500;
 }
@@ -289,10 +299,10 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     color: var(--text-primary);
     width: 300px;
     font-size: 14px;
-    transition: background-color 0.3s ease,
-                border-color 0.3s ease,
-                color 0.3s ease,
-                box-shadow 0.3s ease;
+    transition: background-color 0.5s ease,
+                border-color 0.5s ease,
+                color 0.5s ease,
+                box-shadow 0.5s ease;
     height: 44px;
 }
 
@@ -325,9 +335,9 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     text-align: center;
     cursor: pointer;
     transition: transform 0.3s ease,
-                background-color 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
+                background-color 0.5s ease,
+                border-color 0.5s ease,
+                box-shadow 0.5s ease;
     padding: 20px;
     border-radius: 15px;
     background: var(--card-bg);
@@ -350,8 +360,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     border: 3px solid var(--accent);
     overflow: hidden;
     transition: transform 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
+                border-color 0.5s ease,
+                box-shadow 0.5s ease;
     position: relative;
     will-change: transform;
 }
@@ -387,6 +397,13 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     display: none;
     /* backdrop-filter removed for performance */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+body.light-theme .context-menu {
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid #EF5A6F;
+    box-shadow: 0 10px 30px rgba(239, 90, 111, 0.2);
 }
 
 .menu-item {
@@ -395,9 +412,13 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: background-color 0.3s ease,
-                color 0.3s ease;
+    transition: background-color 0.5s ease,
+                color 0.5s ease;
     color: #fff;
+}
+
+body.light-theme .menu-item {
+    color: #1F2933;
 }
 
 .menu-item:hover {
@@ -405,9 +426,18 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     color: #ff0000;
 }
 
+body.light-theme .menu-item:hover {
+    background: rgba(239, 90, 111, 0.15);
+    color: #EF5A6F;
+}
+
 .menu-item i {
     width: 16px;
     color: #ff0000;
+}
+
+body.light-theme .menu-item i {
+    color: #EF5A6F;
 }
 
 /* Player */
@@ -423,8 +453,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     align-items: center;
     justify-content: space-between;
     padding: 0 30px;
-    transition: background-color 0.4s ease, 
-                border-color 0.4s ease;
+    transition: background-color 0.5s ease, 
+                border-color 0.5s ease;
 }
 
 .player-controls {
@@ -444,11 +474,11 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s ease,
-                border-color 0.3s ease,
-                color 0.3s ease,
+    transition: background-color 0.5s ease,
+                border-color 0.5s ease,
+                color 0.5s ease,
                 transform 0.2s ease,
-                box-shadow 0.3s ease;
+                box-shadow 0.5s ease;
     font-size: 16px;
 }
 
@@ -479,6 +509,7 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     height: 50px;
     border-radius: 8px;
     border: 2px solid var(--border);
+    transition: border-color 0.5s ease;
 }
 
 .song-info {
@@ -490,11 +521,13 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
+    transition: color 0.5s ease;
 }
 
 .song-artist {
     font-size: 14px;
     color: var(--text-secondary);
+    transition: color 0.5s ease;
 }
 
 .player-options {
@@ -511,8 +544,8 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     font-size: 18px;
     padding: 10px;
     border-radius: 50%;
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
+    transition: background-color 0.5s ease,
+                color 0.5s ease,
                 transform 0.2s ease;
     width: 40px;
     height: 40px;
@@ -530,6 +563,41 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
 .option-btn.active {
     background: var(--accent);
     color: #fff;
+}
+
+/* Song Progress Info */
+.song-progress-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    transition: color 0.5s ease;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s linear,
+                background 0.5s ease;
 }
 
 /* Tooltips */
@@ -554,7 +622,10 @@ body.light-theme .gradient-6 { background: linear-gradient(135deg, #f3f4f6 0%, #
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease,
+                background 0.5s ease,
+                border-color 0.5s ease,
+                color 0.5s ease;
     z-index: 100;
 }
 
@@ -591,10 +662,23 @@ body.light-theme [data-tooltip]::after {
 .main-content::-webkit-scrollbar-thumb {
     background: #ff0000;
     border-radius: 4px;
+    transition: background 0.3s ease;
 }
 
 .main-content::-webkit-scrollbar-thumb:hover {
     background: #cc0000;
+}
+
+body.light-theme .main-content::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+body.light-theme .main-content::-webkit-scrollbar-thumb {
+    background: #EF5A6F;
+}
+
+body.light-theme .main-content::-webkit-scrollbar-thumb:hover {
+    background: #D62828;
 }
 
 /* Responsive */
@@ -705,4 +789,129 @@ body.light-theme .bubble {
         transform: scale(0);
         opacity: 0;
     }
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-player);
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: all 0.3s ease, background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+    pointer-events: none;
+}
+
+.notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+body.light-theme .notification {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Light Theme - Hover & Animation Enhancements */
+
+body.light-theme .sidebar {
+    background: var(--bg-sidebar);
+    border-right-color: var(--border);
+}
+
+body.light-theme .logo-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 90, 111, 0.6);
+}
+
+body.light-theme .nav-item:hover,
+body.light-theme .nav-item.active {
+    box-shadow: 0 0 15px rgba(239, 90, 111, 0.5);
+    color: #fff;
+}
+
+body.light-theme .profile-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 90, 111, 0.6);
+}
+
+body.light-theme .category-btn:hover,
+body.light-theme .category-btn.active {
+    box-shadow: 0 0 12px rgba(239, 90, 111, 0.5);
+    transform: translateY(-2px);
+}
+
+body.light-theme #search-input {
+    background: rgba(239, 90, 111, 0.08);
+    border: 2px solid var(--accent);
+}
+
+body.light-theme #search-input:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(239, 90, 111, 0.4);
+    background: rgba(239, 90, 111, 0.12);
+}
+
+body.light-theme .artist-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(239, 90, 111, 0.25);
+}
+
+body.light-theme .artist-image:hover {
+    box-shadow: 0 0 25px rgba(239, 90, 111, 0.5);
+    transform: scale(1.05);
+}
+
+body.light-theme .control-btn:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px rgba(239, 90, 111, 0.4);
+    transform: scale(1.05);
+}
+
+body.light-theme .player {
+    background: var(--bg-player);
+    border-top-color: var(--border);
+}
+
+body.light-theme .song-title {
+    color: var(--text-primary);
+}
+
+body.light-theme .song-artist {
+    color: var(--text-secondary);
+}
+
+body.light-theme #current-cover {
+    border-color: var(--border);
+}
+
+body.light-theme .option-btn {
+    color: var(--accent);
+}
+
+body.light-theme .option-btn:hover {
+    background: rgba(239, 90, 111, 0.1);
+    color: var(--accent);
+}
+
+body.light-theme .library-thumb {
+    box-shadow: 0 8px 24px rgba(239, 90, 111, 0.15);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+body.light-theme .library-card:hover .library-thumb {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(239, 90, 111, 0.25);
 }

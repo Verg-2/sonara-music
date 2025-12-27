@@ -3,6 +3,12 @@ function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
   const isDark = saved !== 'light';
   document.body.classList.toggle('light-theme', !isDark);
+  
+  // Icon'u da ayarla
+  const icon = document.querySelector('#theme-toggle-btn i');
+  if (icon) {
+    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+  }
 }
 
 function applyTheme() {

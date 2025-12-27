@@ -7,6 +7,14 @@ function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
   const isLight = saved === 'light';
   document.body.classList.toggle('light-theme', isLight);
+  // Theme toggle ikonu güncelle
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+    }
+  }
 }
 
 function getEmailFromStorage() {

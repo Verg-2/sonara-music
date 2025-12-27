@@ -19,8 +19,16 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Şifre gerekli'],
-        minlength: 6,
-        select: false
+        minlength: [8, 'Şifre en az 8 karakter olmalı'],
+        maxlength: 128,
+        select: false,
+        validate: {
+            validator: function(v) {
+                // At least 1 uppercase, 1 lowercase, 1 number
+                return /[A-Z]/.test(v) && /[a-z]/.test(v) && /[0-9]/.test(v);
+            },
+            message: 'Şifre en az 1 büyük harf, 1 küçük harf ve 1 rakam içermeli'
+        }
     },
     profileImage: {
         type: String,
