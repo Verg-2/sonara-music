@@ -6,12 +6,22 @@ const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const http = require('http'); // For Socket.io
 
 // Load env vars
 dotenv.config();
 
+// 🔹 Redis Client (Cache System)
+const redisClient = require('./services/redisClient');
+
+// 🔹 Socket.io Configuration
+const { initializeSocket } = require('./config/socket');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// 🔹 CREATE HTTP SERVER FOR SOCKET.IO
+const httpServer = http.createServer(app);
 
 // Trust proxy for correct protocol detection (behind reverse proxy)
 app.set('trust proxy', 1);
@@ -196,8 +206,6 @@ app.use('/api/media', (req, res) => {
 console.log('[INIT] Static dosya servisi açıldı: /api/media');
 
 // 🔹 RUST PROXY
-const http = require('http');
-
 app.get('/api/rust/hello', (req, res) => {
     console.log('[REQUEST] /api/rust/hello çağrısı geldi');
     
@@ -305,6 +313,28 @@ try {
     console.error('[ERROR] /api/auth yükleme hatası:', e.message);
 }
 
+try {
+    app.use('/api/upload', require('./routes/upload'));
+    console.log('[INIT] /api/upload route yüklendi');
+} catch (e) {
+    console.error('[ERROR] /api/upload yükleme hatası:', e.message);
+}
+
+try {
+    app.use('/api/search', require('./routes/search'));
+    console.log('[INIT] /api/search route yüklendi');
+} catch (e) {
+    console.error('[ERROR] /api/search yükleme hatası:', e.message);
+}
+
+// 🔹 TEST CACHE ROUTES (Development - Redis cache testing)
+try {
+    app.use('/api/test-cache', require('./routes/test-cache'));
+    console.log('[INIT] 🧪 /api/test-cache route yüklendi (test endpoints)');
+} catch (e) {
+    console.error('[ERROR] /api/test-cache yükleme hatası:', e.message);
+}
+
 // 🔹 STATIC ASSETS (Logo, favicon, etc.)
 app.use('/assets', express.static(path.join(__dirname, '../assets'), {
     maxAge: '1y',
@@ -343,32 +373,12 @@ app.get('/', (req, res) => {
             playlists: '/api/playlists',
             users: '/api/users',
             auth: '/api/auth',
+            upload: '/api/upload',
+            search: '/api/search',
             rustHello: '/api/rust/hello',
             rustHash: '/api/rust/hash'
         }
     });
-});
-
-// 🔹 ERROR HANDLER (Secure - No stack traces in production)
-app.use((err, req, res, next) => {
-    const isDev = process.env.NODE_ENV === 'development';
-    
-    console.error('[ERROR] Express hata:', err.message);
-    if (isDev) console.error('[ERROR] Stack:', err.stack);
-    
-    // Sanitize error message for production
-    const message = isDev 
-        ? err.message 
-        : 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
-    
-    // Don't expose stack traces in production
-    const errorResponse = {
-        success: false,
-        message,
-        ...(isDev && { error: err.stack })
-    };
-    
-    res.status(err.status || 500).json(errorResponse);
 });
 
 // 🔹 404 HANDLER
@@ -382,12 +392,18 @@ app.use((req, res) => {
     });
 });
 
+// 🔹 GLOBAL ERROR HANDLER (Her zaman en sonda olmalı!)
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
+console.log('[INIT] Global error handler aktif');
+
 // 🔹 SERVER START
-app.listen(PORT, '0.0.0.0', () => {
+const server = httpServer.listen(PORT, '0.0.0.0', () => {
     console.log('\n' + '='.repeat(50));
     console.log(`✅ 🎵 Server ${PORT} portunda çalışıyor`);
     console.log(`✅ 🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
     console.log(`✅ 🚀 Rust proxy: /api/rust/hello, /api/rust/hash`);
+    console.log(`✅ 📡 Socket.io WebSocket sunucusu aktif`);
     console.log('='.repeat(50) + '\n');
 }).on('error', (err) => {
     console.error('[FATAL] Server başlatma hatası:', err.message);
@@ -395,9 +411,23 @@ app.listen(PORT, '0.0.0.0', () => {
     process.exit(1);
 });
 
+// 🔹 INITIALIZE SOCKET.IO
+const io = initializeSocket(httpServer);
+
+// Store io instance globally for use in controllers/services
+global.io = io;
+console.log('[INIT] Socket.io başlatıldı ve global scope\'a eklendi');
+
 // 🔹 MONGODB CONNECTION (async, error handled)
 const connectDB = require('./config/db');
 connectDB().catch(err => {
     console.error('[ERROR] MongoDB bağlantı hatası:', err.message);
     console.log('[INFO] In-memory veri modları kullanılacaktır');
+});
+
+// 🔹 CLOUDINARY CONNECTION TEST
+const cloudinary = require('./config/cloudinary');
+cloudinary.testConnection().catch(err => {
+    console.error('[ERROR] Cloudinary bağlantı hatası:', err.message);
+    console.log('[WARN] Dosya yükleme özellikleri çalışmayabilir');
 });

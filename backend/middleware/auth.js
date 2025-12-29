@@ -48,7 +48,7 @@ exports.protect = async (req, res, next) => {
 // Optional: Admin middleware for future use
 exports.admin = async (req, res, next) => {
     try {
-        if (!req.user.isAdmin) {
+        if (!req.user || req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Bu işlem için admin yetkisi gerekli'
@@ -63,3 +63,26 @@ exports.admin = async (req, res, next) => {
     }
 };
 
+/**
+ * Role-based authorization middleware factory
+ * @param {...string} roles - Allowed roles
+ */
+exports.authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Giriş yapmalısınız'
+            });
+        }
+
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({
+                success: false,
+                message: `Bu işlem için ${roles.join(' veya ')} yetkisi gerekli`
+            });
+        }
+
+        next();
+    };
+};

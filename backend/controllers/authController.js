@@ -1,16 +1,10 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { generateToken, sendTokenResponse } = require('../utils/tokenUtils');
 
 // In-memory storage with expiration (Use Redis in production!)
 const verificationCodes = new Map();
-
-// Secure token generation with expiration
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE || '30d'
-    });
-};
 
 // Validate email format
 const isValidEmail = (email) => {
@@ -240,17 +234,9 @@ exports.login = async (req, res, next) => {
             });
         }
         
-        res.status(200).json({
-            success: true,
-            message: 'Giriş başarılı',
-            data: {
-                _id: user._id,
-                username: user.username,
-                email: user.email,
-                profileImage: user.profileImage,
-                token: generateToken(user._id)
-            }
-        });
+        // Send token response with cookie
+        const token = generateToken(user._id, user.role);
+        sendTokenResponse(res, 200, token, user);
     } catch (error) {
         next(error);
     }

@@ -30,6 +30,11 @@ const UserSchema = new mongoose.Schema({
             message: 'Şifre en az 1 büyük harf, 1 küçük harf ve 1 rakam içermeli'
         }
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin', 'moderator'],
+        default: 'user'
+    },
     profileImage: {
         type: String,
         default: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='100%25' height='100%25' fill='%23ff0000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='Arial' font-size='50'%3EU%3C/text%3E%3C/svg%3E"

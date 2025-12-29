@@ -326,7 +326,15 @@ function setupEventListeners() {
     
     // Theme toggle
     if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', toggleTheme);
+        console.log('✓ Tema butonu bulundu, event listener ekleniyor');
+        themeToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎨 Tema butonu tıklandı!');
+            toggleTheme();
+        });
+    } else {
+        console.error('✗ Tema butonu bulunamadı!');
     }
     
     // Context menu items
@@ -977,39 +985,64 @@ document.addEventListener('mousemove', (e) => {
 function toggleTheme() {
     isDarkTheme = !isDarkTheme;
     applyTheme();
-    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+    const theme = isDarkTheme ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+    console.log('Tema değiştirildi:', theme);
 }
 
 function applyTheme() {
     const themeIcon = document.querySelector('#theme-toggle-btn i');
+    console.log('🎨 applyTheme çağrıldı - isDarkTheme:', isDarkTheme);
+    console.log('🎨 Tema ikonu element:', themeIcon);
     
     // Renkleri hemen değiştir, animasyon yok
     if (isDarkTheme) {
         document.body.classList.remove('light-theme');
-        if (themeIcon) themeIcon.className = 'fas fa-sun';
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeIcon) {
+            // Force class değişimi
+            themeIcon.removeAttribute('class');
+            themeIcon.setAttribute('class', 'fas fa-sun');
+            console.log('✓ İkon güneşe değişti (dark mode) -', themeIcon.className);
+        } else {
+            console.error('✗ Tema ikonu bulunamadı!');
+        }
     } else {
         document.body.classList.add('light-theme');
-        if (themeIcon) themeIcon.className = 'fas fa-moon';
+        document.documentElement.setAttribute('data-theme', 'light');
+        if (themeIcon) {
+            // Force class değişimi
+            themeIcon.removeAttribute('class');
+            themeIcon.setAttribute('class', 'fas fa-moon');
+            console.log('✓ İkon aya değişti (light mode) -', themeIcon.className);
+        } else {
+            console.error('✗ Tema ikonu bulunamadı!');
+        }
     }
 }
 
 function loadSavedTheme() {
     const savedTheme = localStorage.getItem('theme');
+    console.log('Kaydedilmiş tema:', savedTheme);
+    
     if (savedTheme === 'light') {
         isDarkTheme = false;
         document.body.classList.add('light-theme');
-        const themeIcon = document.querySelector('#theme-toggle-btn i');
-        if (themeIcon) {
-            themeIcon.className = 'fas fa-moon';
-        }
+        document.documentElement.setAttribute('data-theme', 'light');
     } else {
         isDarkTheme = true;
         document.body.classList.remove('light-theme');
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    
+    // İkon güncelleme için kısa bir gecikme
+    setTimeout(() => {
         const themeIcon = document.querySelector('#theme-toggle-btn i');
         if (themeIcon) {
-            themeIcon.className = 'fas fa-sun';
+            themeIcon.className = isDarkTheme ? 'fas fa-sun' : 'fas fa-moon';
+            console.log('İkon yüklendi:', themeIcon.className);
         }
-    }
+    }, 100);
 }
 
 // Floating Bubbles

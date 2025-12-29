@@ -9,7 +9,8 @@
     --profile-input-text: #fff;
 }
 
-body.light-theme {
+/* Light theme CSS variables moved to profil-light.css */
+/* body.light-theme {
     --profile-bg: #f5f6f8;
     --card-bg: #ffffff;
     --profile-text: #1F2933;
@@ -17,7 +18,7 @@ body.light-theme {
     --profile-input-bg: #f5f6f8;
     --profile-input-border: #ddd;
     --profile-input-text: #1F2933;
-}
+} */
 
 body.profile-page {
     margin: 0;
@@ -64,17 +65,19 @@ body.profile-page {
     box-shadow: 0 0 20px rgba(255,0,0,0.4);
     color: var(--accent, #ff0000);
     font-size: 28px;
-    transition: background-color 0.5s ease, border-color 0.5s ease;
+    transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
 }
 
-body.light-theme .brand-circle {
+/* Light theme brand circle styles moved to profil-light.css */
+/* body.light-theme .brand-circle {
     background: #ffffff;
     box-shadow: 0 0 20px rgba(255,0,0,0.2);
-}
+} */
 
 .brand-title {
     font-size: 20px;
     font-weight: 700;
+    transition: color 0.5s ease;
 }
 
 .reset-description {
@@ -84,6 +87,7 @@ body.light-theme .brand-circle {
     line-height: 1.5;
     margin: 0 0 1.5rem 0;
     padding: 0 1rem;
+    transition: color 0.5s ease;
 }
 
 .login-form {
@@ -95,11 +99,13 @@ body.light-theme .brand-circle {
 .input-label {
     font-size: 12px;
     color: var(--profile-text-secondary);
+    transition: color 0.5s ease;
 }
 
-body.light-theme .input-label {
+/* Light theme input label styles moved to profil-light.css */
+/* body.light-theme .input-label {
     color: #555;
-}
+} */
 
 .login-form input {
     width: 100%;
@@ -114,28 +120,32 @@ body.light-theme .input-label {
     font-size: 13px;
 }
 
-body.light-theme .login-form input {
+/* Light theme input styles moved to profil-light.css */
+/* body.light-theme .login-form input {
     background: #f5f6f8;
     color: #1F2933;
     border-color: #ddd;
-}
+} */
 
 .login-form input::placeholder {
     color: #999;
+    transition: color 0.5s ease;
 }
 
-body.light-theme .login-form input::placeholder {
+/* Light theme placeholder styles moved to profil-light.css */
+/* body.light-theme .login-form input::placeholder {
     color: #888;
-}
+} */
 
 .login-form input:focus {
     border-color: var(--accent, #ff0000);
     box-shadow: 0 0 10px rgba(255,0,0,0.35);
 }
 
-body.light-theme .login-form input:focus {
+/* Light theme input focus styles moved to profil-light.css */
+/* body.light-theme .login-form input:focus {
     box-shadow: 0 0 10px rgba(255,0,0,0.25);
-}
+} */
 
 .form-row {
     display: flex;
@@ -150,11 +160,13 @@ body.light-theme .login-form input:focus {
     color: #9ad1ff;
     text-decoration: none;
     font-size: 12px;
+    transition: color 0.5s ease;
 }
 
-body.light-theme .link {
+/* Light theme link styles moved to profil-light.css */
+/* body.light-theme .link {
     color: #0066cc;
-}
+} */
 
 .link:hover { text-decoration: underline; }
 
@@ -167,21 +179,23 @@ body.light-theme .link {
     color: #000;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.5s ease, background-color 0.5s ease;
+    transition: transform 0.2s ease, box-shadow 0.5s ease, background-color 0.5s ease, color 0.5s ease;
 }
 
-body.light-theme .primary-btn {
+/* Light theme button styles moved to profil-light.css */
+/* body.light-theme .primary-btn {
     background: #ff0000;
     color: #fff;
-}
+} */
 
 .primary-btn:hover { 
     box-shadow: 0 10px 24px rgba(255,255,255,0.12); 
 }
 
-body.light-theme .primary-btn:hover {
+/* Light theme button hover styles moved to profil-light.css */
+/* body.light-theme .primary-btn:hover {
     box-shadow: 0 10px 24px rgba(255,0,0,0.3);
-}
+} */
 
 .primary-btn:active { transform: scale(0.98); }
 
@@ -191,21 +205,25 @@ body.light-theme .primary-btn:hover {
     gap: 10px;
     color: #aaa;
     font-size: 12px;
+    transition: color 0.5s ease;
 }
 
-body.light-theme .divider {
+/* Light theme divider styles moved to profil-light.css */
+/* body.light-theme .divider {
     color: #999;
-}
+} */
 
 .divider span {
     flex: 1;
     height: 1px;
     background: #222;
+    transition: background-color 0.5s ease;
 }
 
-body.light-theme .divider span {
+/* Light theme divider span styles moved to profil-light.css */
+/* body.light-theme .divider span {
     background: #ddd;
-}
+} */
 
 .social-buttons {
     display: grid;
@@ -228,25 +246,34 @@ body.light-theme .divider span {
     font-size: 13px;
 }
 
-body.light-theme .social-btn {
+/* Light theme social button styles moved to profil-light.css */
+/* body.light-theme .social-btn {
     border-color: #ddd;
     background: #f5f6f8;
     color: #1F2933;
-}
+} */
 
 .social-btn:hover {
     border-color: var(--accent, #ff0000);
     box-shadow: 0 10px 24px rgba(255,0,0,0.25);
 }
 
-body.light-theme .social-btn:hover {
+/* Light theme social button hover styles moved to profil-light.css */
+/* body.light-theme .social-btn:hover {
     box-shadow: 0 10px 24px rgba(255,0,0,0.15);
+} */
+
+.social-btn.google i { 
+    color: #db4437;
+    transition: color 0.5s ease;
+}
+.social-btn.apple i { 
+    color: #fff;
+    transition: color 0.5s ease;
 }
 
-.social-btn.google i { color: #db4437; }
-.social-btn.apple i { color: #fff; }
-
-body.light-theme .social-btn.apple i { color: #1F2933; }
+/* Light theme social button icon styles moved to profil-light.css */
+/* body.light-theme .social-btn.apple i { color: #1F2933; } */
 
 .signup-row {
     display: flex;
@@ -254,6 +281,7 @@ body.light-theme .social-btn.apple i { color: #1F2933; }
     gap: 6px;
     font-size: 12px;
     color: #aaa;
+    transition: color 0.5s ease;
 }
 
 @media (max-width: 420px) {

@@ -6,7 +6,7 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
   const isLight = saved === 'light';
-  document.body.classList.toggle('light-theme', isLight);
+  document.documentElement.classList.toggle('light-theme', isLight);
   // Theme toggle ikonu güncelle
   const toggleBtn = document.getElementById('theme-toggle-btn');
   if (toggleBtn) {
@@ -18,8 +18,8 @@ function loadSavedTheme() {
 }
 
 function toggleTheme() {
-  document.body.classList.toggle('light-theme');
-  const isLight = document.body.classList.contains('light-theme');
+  document.documentElement.classList.toggle('light-theme');
+  const isLight = document.documentElement.classList.contains('light-theme');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
   const toggleBtn = document.getElementById('theme-toggle-btn');
   if (toggleBtn) {

@@ -1,0 +1,79 @@
+/* Profil Light Theme Override CSS */
+/* Bu dosya sadece profil sayfaları için light mode renk override'larını içerir */
+/* Mevcut profil.css'e hiç dokunulmamıştır */
+
+/* Profil sayfası light theme değişkenleri */
+html.light-theme body {
+    --profile-bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --profile-text: #1F2933;
+    --profile-text-secondary: #666;
+    --profile-input-bg: #f5f6f8;
+    --profile-input-border: #ddd;
+    --profile-input-text: #1F2933;
+}
+
+/* Brand circle renk override'ları */
+html.light-theme .brand-circle {
+    background: #ffffff;
+    box-shadow: 0 0 20px rgba(239, 90, 111, 0.2);
+}
+
+/* Input label renk override'ları */
+html.light-theme .input-label {
+    color: #555;
+}
+
+/* Input renk override'ları */
+html.light-theme .login-form input {
+    background: #f5f6f8;
+    color: #1F2933;
+    border-color: #ddd;
+}
+
+html.light-theme .login-form input::placeholder {
+    color: #888;
+}
+
+html.light-theme .login-form input:focus {
+    box-shadow: 0 0 10px rgba(239, 90, 111, 0.25);
+}
+
+/* Link renk override'ları */
+html.light-theme .link {
+    color: #0066cc;
+}
+
+/* Button renk override'ları */
+html.light-theme .primary-btn {
+    background: #EF5A6F;
+    color: #fff;
+}
+
+html.light-theme .primary-btn:hover {
+    box-shadow: 0 10px 24px rgba(239, 90, 111, 0.3);
+}
+
+/* Divider renk override'ları */
+html.light-theme .divider {
+    color: #999;
+}
+
+html.light-theme .divider span {
+    background: #ddd;
+}
+
+/* Social button renk override'ları */
+html.light-theme .social-btn {
+    border-color: #ddd;
+    background: #f5f6f8;
+    color: #1F2933;
+}
+
+html.light-theme .social-btn:hover {
+    box-shadow: 0 10px 24px rgba(239, 90, 111, 0.15);
+}
+
+html.light-theme .social-btn.apple i {
+    color: #1F2933;
+}

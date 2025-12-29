@@ -1,25 +1,44 @@
 // Basit tema yönetimi (index ile uyumlu)
 function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
-  const isDark = saved !== 'light';
-  document.body.classList.toggle('light-theme', !isDark);
+  const isLight = saved === 'light';
+  
+  // Hem body hem documentElement'e uygula
+  document.body.classList.toggle('light-theme', isLight);
+  document.documentElement.classList.toggle('light-theme', isLight);
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
   
   // Icon'u da ayarla
-  const icon = document.querySelector('#theme-toggle-btn i');
-  if (icon) {
-    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-  }
+  setTimeout(() => {
+    const icon = document.querySelector('#theme-toggle-btn i');
+    if (icon) {
+      icon.removeAttribute('class');
+      icon.setAttribute('class', isLight ? 'fas fa-moon' : 'fas fa-sun');
+      console.log('✓ Kütüphane tema ikonu yüklendi:', icon.className);
+    }
+  }, 50);
 }
 
 function applyTheme() {
   const isLight = document.body.classList.contains('light-theme');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  
   const icon = document.querySelector('#theme-toggle-btn i');
-  if (icon) icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+  if (icon) {
+    icon.removeAttribute('class');
+    icon.setAttribute('class', isLight ? 'fas fa-moon' : 'fas fa-sun');
+    console.log('✓ Kütüphane tema ikonu değişti:', icon.className);
+  }
 }
 
 function toggleTheme() {
+  console.log('🎨 Kütüphane tema toggle çağrıldı');
   document.body.classList.toggle('light-theme');
+  document.documentElement.classList.toggle('light-theme');
+  
+  const isLight = document.body.classList.contains('light-theme');
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+  
   applyTheme();
 }
 

@@ -6,7 +6,7 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 function loadSavedTheme() {
   const saved = localStorage.getItem('theme');
   const isLight = saved === 'light';
-  document.body.classList.toggle('light-theme', isLight);
+  document.documentElement.classList.toggle('light-theme', isLight);
   // Theme toggle ikonu güncelle
   const toggleBtn = document.getElementById('theme-toggle-btn');
   if (toggleBtn) {
