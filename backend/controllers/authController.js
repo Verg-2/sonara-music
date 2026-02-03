@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { generateToken, sendTokenResponse } = require('../utils/tokenUtils');
+const EmailService = require('../services/EmailService');
 
 // In-memory storage with expiration (Use Redis in production!)
 const verificationCodes = new Map();
@@ -78,9 +79,31 @@ exports.sendVerification = async (req, res, next) => {
             attempts: 0
         });
         
-        // TODO: Send code via email service (Sendgrid, Nodemailer, etc.)
-        console.log(`\n📧 E-POSTA DOĞRULAMA KODU: ${verificationCode}`);
-        console.log(`📨 Gönderilen adres: ${email}\n`);
+        // Send verification email (SendGrid)
+        if (!process.env.SENDGRID_API_KEY) {
+            console.log(`\n📧 E-POSTA DOĞRULAMA KODU: ${verificationCode}`);
+            console.log(`📨 Gönderilen adres: ${email}\n`);
+        }
+        try {
+            await EmailService.sendVerificationEmail({
+                to: email,
+                code: verificationCode,
+                username: email.split('@')[0]
+            });
+        } catch (mailErr) {
+            console.error('[EMAIL] Doğrulama maili gönderilemedi:', mailErr.message);
+            // Backward compatible: still log the code for local/dev fallback
+            console.log(`\n📧 E-POSTA DOĞRULAMA KODU: ${verificationCode}`);
+            console.log(`📨 Gönderilen adres: ${email}\n`);
+
+            // If SendGrid is configured, fail fast in production-like usage
+            if (process.env.SENDGRID_API_KEY) {
+                return res.status(502).json({
+                    success: false,
+                    message: 'E-posta gönderimi başarısız. Lütfen tekrar deneyin.'
+                });
+            }
+        }
         
         res.status(200).json({
             success: true,
@@ -171,6 +194,16 @@ exports.verifyAndRegister = async (req, res, next) => {
         // Remove verification code
         verificationCodes.delete(email);
         
+        // Welcome email (async, non-blocking)
+        setImmediate(() => {
+            EmailService.sendWelcomeEmail({
+                to: user.email,
+                username: user.username
+            }).catch(err => {
+                console.error('[EMAIL] Welcome maili gönderilemedi:', err.message);
+            });
+        });
+
         res.status(201).json({
             success: true,
             message: 'Kayıt başarıyla tamamlandı',

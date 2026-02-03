@@ -49,6 +49,28 @@ npm start
 
 Server http://localhost:5000 adresinde çalışacaktır.
 
+## ✅ Test ve CI (Jest + Supertest)
+
+Yerel çalıştırma:
+```bash
+npm run test
+```
+
+Coverage raporu:
+```bash
+npm run test:coverage
+```
+
+CI için önerilen komut:
+```bash
+npm run test:ci
+```
+
+Notlar:
+- Testler `@shelf/jest-mongodb` ile in-memory MongoDB kullanır.
+- CI ortamında ekstra MongoDB servisi gerektirmez.
+- `NODE_ENV=test` otomatik ayarlanır.
+
 ## 📚 API Endpoints
 
 ### Artists (Sanatçılar)

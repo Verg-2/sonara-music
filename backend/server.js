@@ -11,6 +11,8 @@ const http = require('http'); // For Socket.io
 // Load env vars
 dotenv.config();
 
+const isTest = process.env.NODE_ENV === 'test';
+
 // 🔹 Redis Client (Cache System)
 const redisClient = require('./services/redisClient');
 
@@ -398,18 +400,23 @@ app.use(errorHandler);
 console.log('[INIT] Global error handler aktif');
 
 // 🔹 SERVER START
-const server = httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log('\n' + '='.repeat(50));
-    console.log(`✅ 🎵 Server ${PORT} portunda çalışıyor`);
-    console.log(`✅ 🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
-    console.log(`✅ 🚀 Rust proxy: /api/rust/hello, /api/rust/hash`);
-    console.log(`✅ 📡 Socket.io WebSocket sunucusu aktif`);
-    console.log('='.repeat(50) + '\n');
-}).on('error', (err) => {
-    console.error('[FATAL] Server başlatma hatası:', err.message);
-    console.error('[FATAL] Port %d kullanımda olabilir', PORT);
-    process.exit(1);
-});
+let server = null;
+if (!isTest) {
+    server = httpServer.listen(PORT, '0.0.0.0', () => {
+        console.log('\n' + '='.repeat(50));
+        console.log(`✅ 🎵 Server ${PORT} portunda çalışıyor`);
+        console.log(`✅ 🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
+        console.log(`✅ 🚀 Rust proxy: /api/rust/hello, /api/rust/hash`);
+        console.log(`✅ 📡 Socket.io WebSocket sunucusu aktif`);
+        console.log('='.repeat(50) + '\n');
+    }).on('error', (err) => {
+        console.error('[FATAL] Server başlatma hatası:', err.message);
+        console.error('[FATAL] Port %d kullanımda olabilir', PORT);
+        process.exit(1);
+    });
+} else {
+    console.log('[INIT] Test modu: HTTP server dinlemede değil');
+}
 
 // 🔹 INITIALIZE SOCKET.IO
 const io = initializeSocket(httpServer);
@@ -419,15 +426,19 @@ global.io = io;
 console.log('[INIT] Socket.io başlatıldı ve global scope\'a eklendi');
 
 // 🔹 MONGODB CONNECTION (async, error handled)
-const connectDB = require('./config/db');
-connectDB().catch(err => {
-    console.error('[ERROR] MongoDB bağlantı hatası:', err.message);
-    console.log('[INFO] In-memory veri modları kullanılacaktır');
-});
+if (!isTest) {
+    const connectDB = require('./config/db');
+    connectDB().catch(err => {
+        console.error('[ERROR] MongoDB bağlantı hatası:', err.message);
+        console.log('[INFO] In-memory veri modları kullanılacaktır');
+    });
 
-// 🔹 CLOUDINARY CONNECTION TEST
-const cloudinary = require('./config/cloudinary');
-cloudinary.testConnection().catch(err => {
-    console.error('[ERROR] Cloudinary bağlantı hatası:', err.message);
-    console.log('[WARN] Dosya yükleme özellikleri çalışmayabilir');
-});
+    // 🔹 CLOUDINARY CONNECTION TEST
+    const cloudinary = require('./config/cloudinary');
+    cloudinary.testConnection().catch(err => {
+        console.error('[ERROR] Cloudinary bağlantı hatası:', err.message);
+        console.log('[WARN] Dosya yükleme özellikleri çalışmayabilir');
+    });
+}
+
+module.exports = { app, httpServer, server };
